@@ -38,63 +38,98 @@ VALUES (
 -- Service items
 -- ============================================================
 
-INSERT INTO service_item (service_item_id, name) VALUES
+INSERT INTO service_item (
+    service_item_id,
+    name,
+    description
+)
+VALUES
 (
     'b0000000-0000-0000-0000-000000000001',
-    'Engine oil and filter'
+    'Engine oil and filter',
+    'Replace engine oil and oil filter'
 ),
 (
     'b0000000-0000-0000-0000-000000000002',
-    'Rear differential fluid'
+    'Rear differential fluid',
+    'Replace rear differential fluid on AWD models'
 ),
 (
     'b0000000-0000-0000-0000-000000000003',
-    'Spark plugs'
+    'Spark plugs',
+    'Replace spark plugs'
 ),
 (
     'b0000000-0000-0000-0000-000000000004',
-    'Brake fluid'
+    'Brake fluid',
+    'Replace brake fluid'
 ),
 (
     'b0000000-0000-0000-0000-000000000005',
-    'Coolant'
+    'Engine coolant',
+    'Replace engine coolant'
 ),
 (
     'b0000000-0000-0000-0000-000000000006',
-    'Cabin air filter'
+    'Cabin air filter',
+    'Replace cabin air / pollen filter'
 ),
 (
     'b0000000-0000-0000-0000-000000000007',
-    'Engine air filter'
+    'Engine air filter',
+    'Replace engine air cleaner element'
 ),
 (
     'b0000000-0000-0000-0000-000000000008',
-    'Tyre rotation'
+    'Tyre rotation',
+    'Rotate tyres'
 ),
 (
     'b0000000-0000-0000-0000-000000000009',
-    'Tyre replacement'
+    'Tyre replacement',
+    'Replace tyres as required'
 ),
 (
     'b0000000-0000-0000-0000-000000000010',
-    'Automatic transmission fluid'
+    'Automatic transmission fluid',
+    'Replace automatic transmission fluid'
 ),
 (
     'b0000000-0000-0000-0000-000000000011',
-    'Front brake pads'
+    'Front brake pads',
+    'Replace front brake pads as required'
 ),
 (
     'b0000000-0000-0000-0000-000000000012',
-    'Rear brake pads'
+    'Rear brake pads',
+    'Replace rear brake pads as required'
+),
+(
+    'b0000000-0000-0000-0000-000000000013',
+    'Brake inspection',
+    'Inspect front and rear brakes'
+),
+(
+    'b0000000-0000-0000-0000-000000000014',
+    'Drive belt inspection',
+    'Inspect accessory drive belt condition'
+),
+(
+    'b0000000-0000-0000-0000-000000000015',
+    'Valve clearance inspection',
+    'Inspect valve clearances and adjust if required'
 );
 
 
 -- ============================================================
 -- Honda CR-V example service schedule
 --
--- Based on the kilometre intervals in the existing service
--- tracking note. These have not been independently verified
--- against Honda manufacturer documentation.
+-- Representative schedule for a third-generation petrol AWD
+-- Honda CR-V. Intended as realistic development/catalogue data,
+-- not an authoritative manufacturer service schedule.
+--
+-- Where both distance and time are specified, service is due
+-- when either threshold is reached first.
 -- ============================================================
 
 INSERT INTO service_schedule (
@@ -102,71 +137,105 @@ INSERT INTO service_schedule (
     vehicle_specification_id,
     service_item_id,
     interval_km,
-    interval_months
+    interval_months,
+    notes
 )
 VALUES
 (
     'c0000000-0000-0000-0000-000000000001',
     'a0000000-0000-0000-0000-000000000001',
     'b0000000-0000-0000-0000-000000000001',
-    15000,
+    10000,
+    12,
     NULL
 ),
 (
     'c0000000-0000-0000-0000-000000000002',
     'a0000000-0000-0000-0000-000000000001',
     'b0000000-0000-0000-0000-000000000002',
-    150000,
-    NULL
+    40000,
+    24,
+    'Representative AWD rear differential fluid interval'
 ),
 (
     'c0000000-0000-0000-0000-000000000003',
     'a0000000-0000-0000-0000-000000000001',
     'b0000000-0000-0000-0000-000000000003',
-    180000,
+    100000,
+    NULL,
     NULL
 ),
 (
     'c0000000-0000-0000-0000-000000000004',
     'a0000000-0000-0000-0000-000000000001',
     'b0000000-0000-0000-0000-000000000004',
-    80000,
+    NULL,
+    36,
     NULL
 ),
 (
     'c0000000-0000-0000-0000-000000000005',
     'a0000000-0000-0000-0000-000000000001',
     'b0000000-0000-0000-0000-000000000005',
-    30000,
-    NULL
+    100000,
+    60,
+    'Repeating replacement interval; initial factory coolant interval may be longer'
 ),
 (
     'c0000000-0000-0000-0000-000000000006',
     'a0000000-0000-0000-0000-000000000001',
     'b0000000-0000-0000-0000-000000000006',
-    50000,
+    30000,
+    12,
     NULL
 ),
 (
     'c0000000-0000-0000-0000-000000000007',
     'a0000000-0000-0000-0000-000000000001',
     'b0000000-0000-0000-0000-000000000007',
-    50000,
+    20000,
+    NULL,
     NULL
 ),
 (
     'c0000000-0000-0000-0000-000000000008',
     'a0000000-0000-0000-0000-000000000001',
     'b0000000-0000-0000-0000-000000000008',
-    15000,
+    10000,
+    NULL,
     NULL
+),
+(
+    'c0000000-0000-0000-0000-000000000009',
+    'a0000000-0000-0000-0000-000000000001',
+    'b0000000-0000-0000-0000-000000000010',
+    60000,
+    36,
+    'Representative automatic transmission fluid interval'
 ),
 (
     'c0000000-0000-0000-0000-000000000010',
     'a0000000-0000-0000-0000-000000000001',
-    'b0000000-0000-0000-0000-000000000010',
-    200000,
+    'b0000000-0000-0000-0000-000000000013',
+    10000,
+    12,
     NULL
+),
+(
+    'c0000000-0000-0000-0000-000000000011',
+    'a0000000-0000-0000-0000-000000000001',
+    'b0000000-0000-0000-0000-000000000014',
+    40000,
+    24,
+    NULL
+),
+(
+    'c0000000-0000-0000-0000-000000000012',
+    'a0000000-0000-0000-0000-000000000001',
+    'b0000000-0000-0000-0000-000000000015',
+    100000,
+    NULL,
+    'Inspect and adjust valve clearance if required'
 );
 
 COMMIT;
