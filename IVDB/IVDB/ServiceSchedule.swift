@@ -6,30 +6,28 @@
 //
 
 import Foundation
-import SwiftData
 
-@Model
-final class ServiceSchedule {
-    var id: UUID
+struct ServiceSchedule: Identifiable, Hashable {
+    let id: UUID
 
-    var vehicleSpecificationId: UUID?
-    var serviceItem: ServiceItem
+    let vehicleSpecificationId: UUID
+    let serviceItemId: UUID
 
-    var intervalKm: Int?
-    var intervalMonths: Int?
-    var notes: String?
+    let intervalKm: Int?
+    let intervalMonths: Int?
+    let notes: String?
 
     init(
-        id: UUID = UUID(),
-        vehicleSpecificationId: UUID? = nil,
-        serviceItem: ServiceItem,
+        id: UUID,
+        vehicleSpecificationId: UUID,
+        serviceItemId: UUID,
         intervalKm: Int? = nil,
         intervalMonths: Int? = nil,
         notes: String? = nil
     ) {
         self.id = id
         self.vehicleSpecificationId = vehicleSpecificationId
-        self.serviceItem = serviceItem
+        self.serviceItemId = serviceItemId
         self.intervalKm = intervalKm
         self.intervalMonths = intervalMonths
         self.notes = notes

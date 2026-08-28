@@ -6,17 +6,15 @@
 //
 
 import Foundation
-import SwiftData
 
-@Model
-final class ServiceItem {
-    var id: UUID
+struct ServiceItem: Identifiable, Hashable {
+    let id: UUID
 
-    var name: String
-    var itemDescription: String?
+    let name: String
+    let itemDescription: String?
 
     init(
-        id: UUID = UUID(),
+        id: UUID,
         name: String,
         itemDescription: String? = nil
     ) {

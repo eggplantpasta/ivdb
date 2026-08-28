@@ -39,7 +39,7 @@
 
 ## 4. Catalogue/reference data
 
-- [ ] Define Swift value types/DTOs for catalogue `VehicleSpecification`, `ServiceItem` and `ServiceSchedule` rows without making them SwiftData models
+- [x] Define Swift value types/DTOs for catalogue `VehicleSpecification`, `ServiceItem` and `ServiceSchedule` rows without making them SwiftData models
 - [ ] Build `catalogue.sqlite` from the catalogue schema and seed/import sources before application distribution
 - [ ] Populate `catalogue.sqlite` with the initial Honda CR-V vehicle specifications
 - [ ] Populate `catalogue.sqlite` with service items and recommended service schedules

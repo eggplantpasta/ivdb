@@ -6,25 +6,23 @@
 //
 
 import Foundation
-import SwiftData
 
-@Model
-final class VehicleSpecification {
-    var id: UUID
+struct VehicleSpecification: Identifiable, Hashable {
+    let id: UUID
 
-    var make: String
-    var model: String
-    var generation: String?
-    var yearFrom: Int?
-    var yearTo: Int?
-    var series: String?
-    var trim: String?
-    var bodyType: String?
-    var engine: String?
-    var transmission: String?
+    let make: String
+    let model: String
+    let generation: String?
+    let yearFrom: Int?
+    let yearTo: Int?
+    let series: String?
+    let trim: String?
+    let bodyType: String?
+    let engine: String?
+    let transmission: String?
 
     init(
-        id: UUID = UUID(),
+        id: UUID,
         make: String,
         model: String,
         generation: String? = nil,
