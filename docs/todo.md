@@ -18,12 +18,12 @@
 - [x] Build reference database using `_builddb.sql`
 - [x] Check database with `PRAGMA foreign_key_check`
 - [x] Review resulting seed data
-- [ ] Review `docs/data-model.md` against the SQL schema before implementing SwiftData models
-- [ ] Keep the SQL schema as the conceptual/reference model rather than accessing SQLite directly from the app
+- [x] Review `docs/data-model.md` against the SQL schema before implementing SwiftData models
+- [x] Keep the SQL schema as the conceptual/reference model rather than accessing SQLite directly from the app
 
 ## 3. SwiftData persistence
 
-- [ ] Create `VehicleSpecification` model from `docs/data-model.md`
+- [x] Create `VehicleSpecification` model from `docs/data-model.md`
 - [ ] Create `Vehicle` model
 - [ ] Create `ServiceItem` model
 - [ ] Create `ServiceSchedule` model
@@ -32,7 +32,7 @@
 - [ ] Use `UUID` identifiers for persistent records
 - [ ] Define SwiftData relationships between the six models
 - [ ] Confirm optional relationships allow a `Vehicle` without a catalogue `VehicleSpecification`
-- [ ] Configure the SwiftData model container
+- [x] Configure the SwiftData model container
 - [ ] Verify basic local persistence by creating, quitting and reopening the app
 
 ## 4. Catalogue/reference data
