@@ -20,8 +20,8 @@
 - [x] Review resulting seed data
 - [x] Review `docs/data-model.md` against the SQL schema before implementing SwiftData models
 - [x] Keep the SQL schema as the conceptual relational model and design reference
-- [ ] Confirm the catalogue schema contains only `VehicleSpecification`, `ServiceItem` and `ServiceSchedule` data
-- [ ] Keep development/test user data in `example-data.sql`, separate from catalogue seed data
+- [x] Confirm the catalogue schema contains only `VehicleSpecification`, `ServiceItem` and `ServiceSchedule` data
+- [x] Keep development/test user data in `example-data.sql`, separate from catalogue seed data
 
 ## 3. SwiftData persistence
 

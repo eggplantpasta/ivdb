@@ -11,10 +11,7 @@ PRAGMA foreign_keys = ON;
 
 .read vehicle_specification.create.sql
 .read service_item.create.sql
-.read vehicle.create.sql
 .read service_schedule.create.sql
-.read service_schedule_override.create.sql
-.read service_history.create.sql
 
 .read seed.sql
 
