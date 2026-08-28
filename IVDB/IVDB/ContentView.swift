@@ -36,7 +36,8 @@ struct ContentView: View {
                     VStack(alignment: .leading) {
                         Text(vehicle.name)
 
-                        if let specification = vehicle.vehicleSpecification {
+                        if let specificationId = vehicle.vehicleSpecificationId,
+                           let specification = vehicleSpecifications.first(where: { $0.id == specificationId }) {
                             Text("\(specification.make) \(specification.model)")
                                 .font(.caption)
                         }
@@ -56,7 +57,7 @@ struct ContentView: View {
         }
 
         let vehicle = Vehicle(
-            vehicleSpecification: crvSpecification,
+            vehicleSpecificationId: crvSpecification.id,
             name: "My CR-V",
             registration: "1ABC234",
             colour: "Silver",
@@ -65,13 +66,7 @@ struct ContentView: View {
 
         modelContext.insert(vehicle)
     }
-    
-    private func deleteSpecifications(at offsets: IndexSet) {
-        for offset in offsets {
-            let specification = vehicleSpecifications[offset]
-            modelContext.delete(specification)
-        }
-    }
+
 }
 
 #Preview {

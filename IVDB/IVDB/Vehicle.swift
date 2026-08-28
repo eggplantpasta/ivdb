@@ -12,7 +12,7 @@ import SwiftData
 final class Vehicle {
     var id: UUID
 
-    var vehicleSpecification: VehicleSpecification?
+    var vehicleSpecificationId: UUID?
 
     var name: String
     var registration: String?
@@ -23,7 +23,7 @@ final class Vehicle {
 
     init(
         id: UUID = UUID(),
-        vehicleSpecification: VehicleSpecification? = nil,
+        vehicleSpecificationId: UUID? = nil,
         name: String,
         registration: String? = nil,
         vin: String? = nil,
@@ -32,7 +32,7 @@ final class Vehicle {
         notes: String? = nil
     ) {
         self.id = id
-        self.vehicleSpecification = vehicleSpecification
+        self.vehicleSpecificationId = vehicleSpecificationId
         self.name = name
         self.registration = registration
         self.vin = vin
