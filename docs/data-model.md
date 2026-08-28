@@ -11,47 +11,57 @@ a catalogue of vehicle specifications and recommended service schedules
 with the application.
 
 The SQL schema in `docs/database/` is the **conceptual relational model
-and design reference**. The application persistence layer will be
-implemented using SwiftData, with user data intended to synchronise
-between the user's devices using CloudKit/iCloud.
+and design reference**.
+
+Catalogue/reference data will be supplied with the application in a
+bundled SQLite database. User-owned data will be persisted using
+SwiftData and is intended to synchronise between the user's devices
+using CloudKit/iCloud.
 
 The model is deliberately kept small and conventional.
 
 ## Design principles
 
--   Keep the model simple.
--   One service history record represents one maintenance action;
-    service actions are not grouped into workshop visits.
--   Separate generic vehicle/model information from an individual user's
-    vehicle.
--   Separate application-supplied catalogue data from user-owned data.
--   Allow a vehicle to exist even when its model is not present in the
-    supplied vehicle catalogue.
--   Recommended schedules belong to a vehicle specification.
--   Users may override the recommended schedule for an individual
-    vehicle.
--   Do not store calculated "next due" values when they can be derived
-    from service history and schedule data.
--   Use UUIDs for persistent identifiers so records can be safely
-    created independently on multiple devices.
--   The SQL design is a reference model; Swift code should use normal
-    Swift naming and SwiftData relationships rather than attempting to
-    reproduce SQL mechanically.
+- Keep the model simple.
+- One service history record represents one maintenance action;
+  service actions are not grouped into workshop visits.
+- Separate generic vehicle/model information from an individual user's
+  vehicle.
+- Separate application-supplied catalogue data from user-owned data.
+- Allow a vehicle to exist even when its model is not present in the
+  supplied vehicle catalogue.
+- Recommended schedules belong to a vehicle specification.
+- Users may override the recommended schedule for an individual
+  vehicle.
+- Do not store calculated "next due" values when they can be derived
+  from service history and schedule data.
+- Use UUIDs for persistent identifiers so records can be safely
+  created independently on multiple devices.
+- The SQL design is a reference model; Swift code should use normal
+  Swift naming and appropriate persistence mechanisms rather than
+  attempting to reproduce SQL mechanically.
+- References from user-owned data to catalogue data use stable UUIDs
+  rather than SwiftData relationships.
 
 ## Entities
 
-The model contains six entities:
+The conceptual model contains six entities:
 
-1.  `vehicle_specification`
-2.  `vehicle`
-3.  `service_item`
-4.  `service_schedule`
-5.  `service_schedule_override`
-6.  `service_history`
+1. `vehicle_specification`
+2. `vehicle`
+3. `service_item`
+4. `service_schedule`
+5. `service_schedule_override`
+6. `service_history`
+
+These entities are divided between application-supplied catalogue data
+and user-owned data.
 
 ## Relationships
 
-``` text
+Conceptually:
+
+```text
 vehicle_specification
         |
         +----< service_schedule >---- service_item
@@ -78,7 +88,12 @@ interval for one particular vehicle.
 A `service_history` row records one maintenance action actually
 performed on one vehicle.
 
-------------------------------------------------------------------------
+The diagram above describes the conceptual relationships. In the
+application implementation, relationships that cross the boundary
+between catalogue data and user-owned data are represented using stable
+UUID references rather than persistence-layer relationships.
+
+---
 
 ## vehicle_specification
 
@@ -95,7 +110,7 @@ with the application.
 
 ### Conceptual columns
 
-``` sql
+```sql
 vehicle_specification_id TEXT PRIMARY KEY NOT NULL
 make                     TEXT NOT NULL
 model                    TEXT NOT NULL
@@ -121,7 +136,10 @@ build year.
 The catalogue does not need to contain every possible vehicle. A user
 must be able to create a vehicle without selecting a specification.
 
-------------------------------------------------------------------------
+Vehicle specification identifiers must remain stable between catalogue
+versions because user-owned vehicle records may refer to them.
+
+---
 
 ## vehicle
 
@@ -133,7 +151,7 @@ This is user-owned data and is expected to synchronise through iCloud.
 
 ### Conceptual columns
 
-``` sql
+```sql
 vehicle_id               TEXT PRIMARY KEY NOT NULL
 vehicle_specification_id TEXT
 name                     TEXT NOT NULL
@@ -146,9 +164,10 @@ notes                    TEXT
 
 ### Relationships
 
--   Optionally belongs to one `vehicle_specification`.
--   Has zero or more `service_history` records.
--   Has zero or more `service_schedule_override` records.
+- Optionally refers to one catalogue `vehicle_specification` by stable
+  UUID.
+- Has zero or more `service_history` records.
+- Has zero or more `service_schedule_override` records.
 
 ### Notes
 
@@ -156,12 +175,17 @@ notes                    TEXT
 unusual or custom vehicle to be tracked without requiring catalogue data
 first.
 
+Because `vehicle_specification` is stored in the bundled SQLite
+catalogue while `vehicle` is stored in SwiftData, this reference is not
+implemented as a SwiftData relationship. The application resolves the
+stored UUID against the catalogue database.
+
 `name` is the user-facing name for the vehicle.
 
 The `notes` field is intentionally free-form. A separate vehicle notes
 table is not required for the initial design.
 
-------------------------------------------------------------------------
+---
 
 ## service_item
 
@@ -171,25 +195,25 @@ Defines a type of maintenance operation.
 
 Examples:
 
--   Engine oil and filter
--   Rear differential fluid
--   Spark plugs
--   Brake fluid
--   Coolant
--   Cabin air filter
--   Engine air filter
--   Tyre rotation
--   Tyre replacement
--   Automatic transmission fluid
--   Front brake pads
--   Rear brake pads
+- Engine oil and filter
+- Rear differential fluid
+- Spark plugs
+- Brake fluid
+- Coolant
+- Cabin air filter
+- Engine air filter
+- Tyre rotation
+- Tyre replacement
+- Automatic transmission fluid
+- Front brake pads
+- Rear brake pads
 
 Service items are reusable across vehicle specifications and user
 vehicles.
 
 ### Conceptual columns
 
-``` sql
+```sql
 service_item_id TEXT PRIMARY KEY NOT NULL
 name            TEXT NOT NULL
 description     TEXT
@@ -200,7 +224,11 @@ description     TEXT
 A service item describes *what* was serviced. It does not contain the
 interval, because intervals can differ between vehicle specifications.
 
-------------------------------------------------------------------------
+Service item identifiers must remain stable between catalogue versions
+because user-owned service history and schedule override records may
+refer to them.
+
+---
 
 ## service_schedule
 
@@ -214,7 +242,7 @@ application.
 
 ### Conceptual columns
 
-``` sql
+```sql
 service_schedule_id      TEXT PRIMARY KEY NOT NULL
 vehicle_specification_id TEXT NOT NULL
 service_item_id          TEXT NOT NULL
@@ -225,8 +253,11 @@ notes                    TEXT
 
 ### Relationships
 
--   Belongs to one `vehicle_specification`.
--   Refers to one `service_item`.
+- Belongs to one `vehicle_specification`.
+- Refers to one `service_item`.
+
+Both related entities are part of the bundled SQLite catalogue, so
+these relationships may be enforced using normal SQLite foreign keys.
 
 There should be at most one default schedule for a given vehicle
 specification and service item combination.
@@ -237,7 +268,7 @@ Both distance and time intervals are supported.
 
 For example:
 
-``` text
+```text
 Engine oil and filter
 15,000 km or 12 months
 ```
@@ -250,7 +281,7 @@ A null interval means that dimension is not used.
 Some service items, such as brake pad or tyre replacement, may have no
 fixed interval and therefore need not have a `service_schedule` record.
 
-------------------------------------------------------------------------
+---
 
 ## service_schedule_override
 
@@ -264,7 +295,7 @@ every 15,000 km while the owner prefers every 10,000 km.
 
 ### Conceptual columns
 
-``` sql
+```sql
 service_schedule_override_id TEXT PRIMARY KEY NOT NULL
 vehicle_id                   TEXT NOT NULL
 service_item_id              TEXT NOT NULL
@@ -275,8 +306,14 @@ notes                        TEXT
 
 ### Relationships
 
--   Belongs to one `vehicle`.
--   Refers to one `service_item`.
+- Belongs to one user-owned `vehicle`.
+- Refers to one catalogue `service_item` by stable UUID.
+
+The relationship to `vehicle` is represented using SwiftData.
+
+The `service_item_id` reference crosses from the user's SwiftData store
+to the bundled SQLite catalogue and is therefore represented as a
+stable UUID rather than a SwiftData relationship.
 
 There should be at most one override for a given vehicle and service
 item combination.
@@ -285,7 +322,7 @@ item combination.
 
 Conceptually:
 
-``` text
+```text
 effective schedule =
     vehicle-specific override, if one exists
     otherwise specification default
@@ -293,7 +330,7 @@ effective schedule =
 
 An override is user-owned data and should synchronise through iCloud.
 
-------------------------------------------------------------------------
+---
 
 ## service_history
 
@@ -309,7 +346,7 @@ three independent service history records.
 
 ### Conceptual columns
 
-``` sql
+```sql
 service_history_id TEXT PRIMARY KEY NOT NULL
 vehicle_id         TEXT NOT NULL
 service_item_id    TEXT NOT NULL
@@ -322,8 +359,14 @@ notes              TEXT
 
 ### Relationships
 
--   Belongs to one `vehicle`.
--   Refers to one `service_item`.
+- Belongs to one user-owned `vehicle`.
+- Refers to one catalogue `service_item` by stable UUID.
+
+The relationship to `vehicle` is represented using SwiftData.
+
+The `service_item_id` reference crosses from the user's SwiftData store
+to the bundled SQLite catalogue and is therefore represented as a
+stable UUID rather than a SwiftData relationship.
 
 ### performed_by
 
@@ -332,7 +375,7 @@ separate entity.
 
 Examples:
 
-``` text
+```text
 Me
 Honda dealer
 Local mechanic
@@ -354,19 +397,19 @@ data.
 
 It should be calculated from:
 
--   the latest applicable service history record; and
--   the effective service schedule.
+- the latest applicable service history record; and
+- the effective service schedule.
 
 For distance-based servicing:
 
-``` text
+```text
 next due odometer =
     last service odometer + effective interval kilometres
 ```
 
 For time-based servicing:
 
-``` text
+```text
 next due date =
     last service date + effective interval months
 ```
@@ -374,39 +417,73 @@ next due date =
 This avoids derived values becoming inconsistent with history or
 schedule changes.
 
-------------------------------------------------------------------------
+---
 
 ## Catalogue data vs user data
 
-The model deliberately separates data that may ship with IVDB from data
-belonging to the user.
+The persistence architecture deliberately separates application-supplied
+catalogue data from data belonging to the user.
 
 ### Catalogue / application-supplied data
 
-``` text
+```text
 vehicle_specification
 service_item
 service_schedule
 ```
 
-This data can be seeded by the application and updated as the supplied
-vehicle catalogue evolves.
+Catalogue data is stored in a SQLite database supplied with the
+application.
 
-It should not need to be copied into every user's iCloud data simply to
-make the catalogue available.
+The catalogue database is built before application distribution rather
+than populated by importing large seed files on first launch. This
+allows potentially large reference datasets, such as vehicle
+specifications, to be immediately available and efficiently queried.
+
+New versions of the application may supply updated versions of the
+catalogue database.
+
+Catalogue identifiers must remain stable between catalogue versions.
+
+Catalogue data is not synchronised through CloudKit.
 
 ### User-owned data
 
-``` text
+```text
 vehicle
 service_history
 service_schedule_override
 ```
 
-This data belongs to the user and should be persisted locally and
-synchronised through CloudKit/iCloud.
+User-owned data is persisted using SwiftData and should synchronise
+through CloudKit/iCloud.
 
-------------------------------------------------------------------------
+User-owned records refer to catalogue records using stable UUID
+identifiers rather than SwiftData relationships. This avoids creating
+persistence relationships between the bundled catalogue database and
+the user's synchronised SwiftData store.
+
+For example:
+
+```text
+vehicle.vehicle_specification_id
+    -> vehicle_specification.vehicle_specification_id
+
+service_history.service_item_id
+    -> service_item.service_item_id
+
+service_schedule_override.service_item_id
+    -> service_item.service_item_id
+```
+
+These references are resolved by application code and are not
+foreign-key relationships enforced across the two persistence stores.
+
+Relationships entirely within user-owned data, such as a service
+history record belonging to a vehicle, are represented using SwiftData
+relationships.
+
+---
 
 ## Seed data and example data
 
@@ -415,24 +492,30 @@ development/test user data.
 
 ### seed.sql
 
-Contains catalogue/reference data that could eventually ship with the
-application:
+Contains catalogue/reference data used to build the SQLite catalogue
+that may ship with the application:
 
--   vehicle specifications
--   service items
--   recommended service schedules
+- vehicle specifications
+- service items
+- recommended service schedules
+
+Large source datasets may also be imported as part of the catalogue
+build process.
+
+Seed/import processing occurs during development or application build
+preparation, not when an end user first launches the application.
 
 ### example-data.sql
 
 Contains representative user data for development and testing:
 
--   example owned vehicles
--   service history
--   schedule overrides
+- example owned vehicles
+- service history
+- schedule overrides
 
 Example data must not be treated as application catalogue data.
 
-------------------------------------------------------------------------
+---
 
 ## Identifiers
 
@@ -441,28 +524,38 @@ rather than sequential integer primary keys.
 
 Example:
 
-``` text
+```text
 a3d6bb98-7df7-4e65-bbc7-ff94192b8144
 ```
 
-This is suitable for data that may be created independently on multiple
-devices while offline and later synchronised.
+UUIDs have two roles in IVDB.
+
+For user-owned SwiftData records, UUIDs allow records to be created
+independently on multiple devices while offline and later synchronised.
+
+For catalogue records, UUIDs provide stable identifiers that can be
+stored by user-owned records and resolved against later versions of the
+catalogue.
+
+Catalogue UUIDs must therefore remain stable when the catalogue
+database is rebuilt or updated.
 
 In Swift, identifiers should use `UUID`, for example:
 
-``` swift
+```swift
 var id: UUID = UUID()
 ```
 
-The exact persistence representation is the responsibility of SwiftData.
+The SQLite catalogue may store UUID values as text while SwiftData
+handles the persistence representation of user-owned UUIDs.
 
-------------------------------------------------------------------------
+---
 
 ## SQL and Swift naming
 
 The SQL documentation uses conventional database naming:
 
-``` text
+```text
 vehicle_specification
 service_history
 service_date
@@ -472,7 +565,7 @@ performed_by
 
 Swift code should use normal Swift naming conventions:
 
-``` text
+```text
 VehicleSpecification
 ServiceHistory
 serviceDate
@@ -483,32 +576,54 @@ performedBy
 Types use `UpperCamelCase`; properties and functions use
 `lowerCamelCase`.
 
-------------------------------------------------------------------------
+---
 
-## SwiftData mapping
+## Application persistence mapping
 
-The SQL files are a conceptual design reference rather than a
-requirement to create or manipulate SQLite tables directly from the
-application.
+The six conceptual entities are divided between two persistence
+mechanisms.
 
-Expected conceptual SwiftData models are:
+### SQLite catalogue
 
-``` text
+```text
 VehicleSpecification
-Vehicle
 ServiceItem
 ServiceSchedule
+```
+
+These entities are application-supplied reference data stored in the
+bundled SQLite catalogue.
+
+Relationships between catalogue entities are represented using normal
+SQLite foreign keys.
+
+The catalogue is primarily read-only at application runtime. Updated
+catalogue data is supplied by newer versions of the application rather
+than synchronised as user data.
+
+### SwiftData user data
+
+```text
+Vehicle
 ServiceScheduleOverride
 ServiceHistory
 ```
 
-Relationships should be represented as SwiftData model relationships
-rather than manually managed foreign-key strings where appropriate.
+These entities contain user-owned data and are persisted using
+SwiftData.
 
-The SwiftData implementation should preserve the semantics described in
-this document while following normal Swift/SwiftData idioms.
+Relationships between user-owned entities should use SwiftData
+relationships where appropriate.
 
-------------------------------------------------------------------------
+References from SwiftData user data to SQLite catalogue data use stable
+UUID identifiers. For example, a `Vehicle` stores an optional
+`vehicleSpecificationId` rather than a SwiftData relationship to a
+`VehicleSpecification`.
+
+The application is responsible for resolving these identifiers against
+the catalogue database.
+
+---
 
 ## CloudKit / iCloud considerations
 
@@ -517,30 +632,36 @@ the user's Apple devices through CloudKit/iCloud.
 
 The design therefore assumes:
 
--   records may be created independently on different devices;
--   UUID identifiers are preferable to locally generated sequential IDs;
--   the application should not depend on a permanently available network
-    connection;
--   catalogue/reference data and personal synchronised data are
-    conceptually distinct;
--   model changes should consider SwiftData/CloudKit compatibility from
-    the beginning.
+- records may be created independently on different devices;
+- UUID identifiers are preferable to locally generated sequential IDs;
+- the application should not depend on a permanently available network
+  connection;
+- only user-owned SwiftData models are synchronised through CloudKit;
+- the bundled SQLite catalogue is not part of the CloudKit store;
+- catalogue/reference data and personal synchronised data are
+  deliberately separated;
+- cross-store references use stable catalogue UUIDs rather than
+  SwiftData relationships;
+- SwiftData relationships used by synchronised models must be designed
+  for CloudKit compatibility;
+- model changes should consider SwiftData/CloudKit compatibility from
+  the beginning.
 
-------------------------------------------------------------------------
+---
 
 ## Scope deliberately excluded from the initial model
 
 The initial model does **not** include:
 
--   workshop/service visits containing multiple maintenance actions;
--   a mechanics/workshops table;
--   a separate vehicle notes table;
--   receipts or document attachments;
--   parts inventory;
--   fuel tracking;
--   tyre inventory/position tracking;
--   manufacturer/dealer entities;
--   persisted calculated next-due values.
+- workshop/service visits containing multiple maintenance actions;
+- a mechanics/workshops table;
+- a separate vehicle notes table;
+- receipts or document attachments;
+- parts inventory;
+- fuel tracking;
+- tyre inventory/position tracking;
+- manufacturer/dealer entities;
+- persisted calculated next-due values.
 
 These can be added later if an actual requirement emerges. The initial
 goal is a small model for recording individual vehicle maintenance

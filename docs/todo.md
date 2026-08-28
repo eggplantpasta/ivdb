@@ -19,31 +19,43 @@
 - [x] Check database with `PRAGMA foreign_key_check`
 - [x] Review resulting seed data
 - [x] Review `docs/data-model.md` against the SQL schema before implementing SwiftData models
-- [x] Keep the SQL schema as the conceptual/reference model rather than accessing SQLite directly from the app
+- [x] Keep the SQL schema as the conceptual relational model and design reference
+- [ ] Confirm the catalogue schema contains only `VehicleSpecification`, `ServiceItem` and `ServiceSchedule` data
+- [ ] Keep development/test user data in `example-data.sql`, separate from catalogue seed data
 
 ## 3. SwiftData persistence
 
-- [x] Create `VehicleSpecification` model from `docs/data-model.md`
-- [ ] Create `Vehicle` model
-- [ ] Create `ServiceItem` model
-- [ ] Create `ServiceSchedule` model
-- [ ] Create `ServiceScheduleOverride` model
-- [ ] Create `ServiceHistory` model
-- [ ] Use `UUID` identifiers for persistent records
-- [ ] Define SwiftData relationships between the six models
-- [ ] Confirm optional relationships allow a `Vehicle` without a catalogue `VehicleSpecification`
+- [x] Prototype all six conceptual entities as SwiftData models: `VehicleSpecification`, `Vehicle`, `ServiceItem`, `ServiceSchedule`, `ServiceScheduleOverride` and `ServiceHistory`
 - [x] Configure the SwiftData model container
+- [ ] Remove `VehicleSpecification`, `ServiceItem` and `ServiceSchedule` from the SwiftData schema/model container
+- [ ] Retain/refactor only `Vehicle`, `ServiceHistory` and `ServiceScheduleOverride` as SwiftData models
+- [ ] Use `UUID` identifiers for all user-owned SwiftData records
+- [ ] Represent `Vehicle.vehicleSpecificationId` as an optional stable catalogue UUID, not a SwiftData relationship
+- [ ] Represent `ServiceHistory.serviceItemId` and `ServiceScheduleOverride.serviceItemId` as stable catalogue UUIDs, not SwiftData relationships
+- [ ] Define SwiftData relationships only within user-owned data, including history and overrides belonging to a vehicle
+- [ ] Confirm a `Vehicle` can be stored without a catalogue `VehicleSpecification`
+- [ ] Plan migration/compatibility for any development data created with the original six-model SwiftData prototype
 - [ ] Verify basic local persistence by creating, quitting and reopening the app
 
 ## 4. Catalogue/reference data
 
-- [ ] Decide how application-supplied catalogue data will be packaged and loaded
-- [ ] Keep catalogue data (`VehicleSpecification`, `ServiceItem`, `ServiceSchedule`) separate from user-owned data
-- [ ] Import/seed the initial Honda CR-V vehicle specification
-- [ ] Import/seed service items
-- [ ] Import/seed recommended service schedules
-- [ ] Make catalogue loading repeatable/idempotent so app upgrades do not duplicate records
-- [ ] Decide how future catalogue updates will be versioned/migrated
+- [ ] Define Swift value types/DTOs for catalogue `VehicleSpecification`, `ServiceItem` and `ServiceSchedule` rows without making them SwiftData models
+- [ ] Build `catalogue.sqlite` from the catalogue schema and seed/import sources before application distribution
+- [ ] Populate `catalogue.sqlite` with the initial Honda CR-V vehicle specifications
+- [ ] Populate `catalogue.sqlite` with service items and recommended service schedules
+- [ ] Validate the built catalogue with `PRAGMA foreign_key_check` and automated integrity checks
+- [ ] Add indexes for vehicle-specification browsing/search, service-item lookup and schedule lookup by vehicle specification/service item
+- [ ] Verify representative catalogue queries with `EXPLAIN QUERY PLAN`
+- [ ] Add `catalogue.sqlite` to the application bundle and verify it is present in iPhone, iPad and macOS builds
+- [ ] Open the bundled catalogue read-only at runtime without copying or importing it into SwiftData
+- [ ] Implement a small catalogue query layer for lookup by UUID and for vehicle/service selection lists
+- [ ] Ensure query code handles a missing, unreadable or incompatible catalogue gracefully
+- [ ] Assign deterministic, stable UUIDs to every catalogue record
+- [ ] Ensure catalogue UUIDs never change when the database is rebuilt or an existing record is updated
+- [ ] Add explicit catalogue schema/data version metadata
+- [ ] Define compatibility rules for replacing `catalogue.sqlite` in application updates while preserving UUID references held by user data
+- [ ] Decide how removed/deprecated catalogue records remain resolvable, or how unresolved UUIDs are represented in the UI
+- [ ] Add a repeatable catalogue build command/script suitable for local development and release builds
 
 ## 5. Basic app structure and navigation
 
@@ -61,7 +73,10 @@
 - [ ] Add a vehicle
 - [ ] Edit a vehicle
 - [ ] Delete a vehicle with confirmation
-- [ ] Allow selection of an optional catalogue vehicle specification
+- [ ] Query `catalogue.sqlite` for vehicle specification selection and search
+- [ ] Store the selected specification's stable UUID in `Vehicle.vehicleSpecificationId`
+- [ ] Resolve `vehicleSpecificationId` through the catalogue query layer when displaying a vehicle
+- [ ] Handle a missing/unresolved catalogue specification UUID without losing the user's vehicle data
 - [ ] Allow creation of a vehicle without a matching catalogue specification
 - [ ] Capture name, registration, VIN, colour, build year and notes
 - [ ] Validate required fields and sensible year values
@@ -72,7 +87,10 @@
 - [ ] Display service history for a vehicle
 - [ ] Sort service history sensibly, newest first by default
 - [ ] Record a service history item
-- [ ] Select the applicable `ServiceItem`
+- [ ] Query `catalogue.sqlite` to select the applicable `ServiceItem`
+- [ ] Store the selected service item's stable UUID in `ServiceHistory.serviceItemId`
+- [ ] Resolve service item UUIDs through the catalogue query layer when displaying history
+- [ ] Handle a missing/unresolved service item UUID without losing the history record
 - [ ] Capture service date
 - [ ] Capture optional odometer kilometres
 - [ ] Capture optional `performedBy`
@@ -84,10 +102,15 @@
 
 ## 8. Service schedules and due calculations
 
-- [ ] Display the recommended service schedule for a vehicle specification
+- [ ] Resolve a vehicle's optional catalogue specification UUID before loading its recommended schedule
+- [ ] Query `catalogue.sqlite` for the recommended service schedule and associated service items
+- [ ] Display the recommended service schedule for a resolved vehicle specification
 - [ ] Implement vehicle-specific `ServiceScheduleOverride` records
+- [ ] Store each override's catalogue service item as a stable UUID
 - [ ] Add/edit/remove a schedule override
-- [ ] Resolve effective schedule: vehicle override first, otherwise specification default
+- [ ] Resolve override service item UUIDs and catalogue schedule rows through the catalogue query layer
+- [ ] Resolve effective schedule across both stores: SwiftData vehicle override first, otherwise SQLite catalogue default
+- [ ] Handle missing/unresolved catalogue UUIDs and vehicles without a catalogue specification
 - [ ] Find the latest applicable service history record for each scheduled service item
 - [ ] Calculate next due odometer from last-service odometer + interval kilometres
 - [ ] Calculate next due date from last-service date + interval months
@@ -101,12 +124,15 @@
 
 ## 9. iCloud / CloudKit synchronisation
 
-- [ ] Identify which SwiftData models are user-owned and should synchronise (`Vehicle`, `ServiceHistory`, `ServiceScheduleOverride`)
-- [ ] Confirm catalogue/reference data should remain application-supplied rather than being copied into each user's iCloud store
+- [x] Identify the user-owned SwiftData models that should synchronise: `Vehicle`, `ServiceHistory` and `ServiceScheduleOverride`
+- [x] Confirm `VehicleSpecification`, `ServiceItem` and `ServiceSchedule` remain in the bundled catalogue and are not copied into iCloud
 - [ ] Enable iCloud and CloudKit capabilities in the Xcode project
 - [ ] Configure the CloudKit container
-- [ ] Configure SwiftData persistence for CloudKit-compatible synchronisation
-- [ ] Review model relationships and constraints for SwiftData/CloudKit compatibility
+- [ ] Configure the user-owned SwiftData model container for CloudKit-compatible synchronisation
+- [ ] Verify the CloudKit schema contains only `Vehicle`, `ServiceHistory` and `ServiceScheduleOverride`
+- [ ] Review user-owned relationships and constraints for SwiftData/CloudKit compatibility
+- [ ] Confirm catalogue UUID reference fields synchronise as scalar values and resolve locally against each app version's bundled catalogue
+- [ ] Confirm `catalogue.sqlite` is never uploaded to or synchronised by CloudKit
 - [ ] Test creating data while offline
 - [ ] Test synchronisation between two simulator/device instances where practical
 - [ ] Test conflict behaviour for records edited on multiple devices
@@ -125,6 +151,10 @@
 
 ## 11. Testing
 
+- [ ] Add tests for catalogue database build integrity, version metadata and stable UUIDs
+- [ ] Add tests for catalogue indexes and representative queries
+- [ ] Add tests for catalogue UUID lookup/resolution from each user-owned model
+- [ ] Test missing/unresolved catalogue UUID behaviour across vehicle, history and schedule views
 - [ ] Add unit tests for effective schedule selection
 - [ ] Add unit tests for next-due date calculations
 - [ ] Add unit tests for next-due odometer calculations
@@ -134,6 +164,7 @@
 - [ ] Test create/edit/delete flows for user-owned records
 - [ ] Add representative development/sample data for UI testing
 - [ ] Test persistence across app launches
+- [ ] Test that replacing the bundled catalogue with a compatible newer version preserves user-data references
 - [ ] Test on a physical iPhone
 - [ ] Test on a physical iPad if available
 
