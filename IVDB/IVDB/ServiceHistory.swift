@@ -13,7 +13,7 @@ final class ServiceHistory {
     var id: UUID
 
     var vehicle: Vehicle
-    var serviceItem: ServiceItem
+    var serviceItemId: UUID
 
     var serviceDate: Date
     var odometerKm: Int?
@@ -24,7 +24,7 @@ final class ServiceHistory {
     init(
         id: UUID = UUID(),
         vehicle: Vehicle,
-        serviceItem: ServiceItem,
+        serviceItemId: UUID,
         serviceDate: Date,
         odometerKm: Int? = nil,
         performedBy: String? = nil,
@@ -33,7 +33,7 @@ final class ServiceHistory {
     ) {
         self.id = id
         self.vehicle = vehicle
-        self.serviceItem = serviceItem
+        self.serviceItemId = serviceItemId
         self.serviceDate = serviceDate
         self.odometerKm = odometerKm
         self.performedBy = performedBy

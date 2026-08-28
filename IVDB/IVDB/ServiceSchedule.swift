@@ -12,7 +12,7 @@ import SwiftData
 final class ServiceSchedule {
     var id: UUID
 
-    var vehicleSpecification: VehicleSpecification
+    var vehicleSpecificationId: UUID?
     var serviceItem: ServiceItem
 
     var intervalKm: Int?
@@ -21,14 +21,14 @@ final class ServiceSchedule {
 
     init(
         id: UUID = UUID(),
-        vehicleSpecification: VehicleSpecification,
+        vehicleSpecificationId: UUID? = nil,
         serviceItem: ServiceItem,
         intervalKm: Int? = nil,
         intervalMonths: Int? = nil,
         notes: String? = nil
     ) {
         self.id = id
-        self.vehicleSpecification = vehicleSpecification
+        self.vehicleSpecificationId = vehicleSpecificationId
         self.serviceItem = serviceItem
         self.intervalKm = intervalKm
         self.intervalMonths = intervalMonths

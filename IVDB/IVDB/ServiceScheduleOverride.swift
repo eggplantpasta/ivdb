@@ -13,7 +13,7 @@ final class ServiceScheduleOverride {
     var id: UUID
 
     var vehicle: Vehicle
-    var serviceItem: ServiceItem
+    var serviceItemId: UUID
 
     var intervalKm: Int?
     var intervalMonths: Int?
@@ -22,14 +22,14 @@ final class ServiceScheduleOverride {
     init(
         id: UUID = UUID(),
         vehicle: Vehicle,
-        serviceItem: ServiceItem,
+        serviceItemId: UUID,
         intervalKm: Int? = nil,
         intervalMonths: Int? = nil,
         notes: String? = nil
     ) {
         self.id = id
         self.vehicle = vehicle
-        self.serviceItem = serviceItem
+        self.serviceItemId = serviceItemId
         self.intervalKm = intervalKm
         self.intervalMonths = intervalMonths
         self.notes = notes

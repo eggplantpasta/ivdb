@@ -27,13 +27,13 @@
 
 - [x] Prototype all six conceptual entities as SwiftData models: `VehicleSpecification`, `Vehicle`, `ServiceItem`, `ServiceSchedule`, `ServiceScheduleOverride` and `ServiceHistory`
 - [x] Configure the SwiftData model container
-- [ ] Remove `VehicleSpecification`, `ServiceItem` and `ServiceSchedule` from the SwiftData schema/model container
-- [ ] Retain/refactor only `Vehicle`, `ServiceHistory` and `ServiceScheduleOverride` as SwiftData models
-- [ ] Use `UUID` identifiers for all user-owned SwiftData records
-- [ ] Represent `Vehicle.vehicleSpecificationId` as an optional stable catalogue UUID, not a SwiftData relationship
-- [ ] Represent `ServiceHistory.serviceItemId` and `ServiceScheduleOverride.serviceItemId` as stable catalogue UUIDs, not SwiftData relationships
-- [ ] Define SwiftData relationships only within user-owned data, including history and overrides belonging to a vehicle
-- [ ] Confirm a `Vehicle` can be stored without a catalogue `VehicleSpecification`
+- [x] Remove `VehicleSpecification`, `ServiceItem` and `ServiceSchedule` from the SwiftData schema/model container
+- [x] Retain/refactor only `Vehicle`, `ServiceHistory` and `ServiceScheduleOverride` as SwiftData models
+- [x] Use `UUID` identifiers for all user-owned SwiftData records
+- [x] Represent `Vehicle.vehicleSpecificationId` as an optional stable catalogue UUID, not a SwiftData relationship
+- [x] Represent `ServiceHistory.serviceItemId` and `ServiceScheduleOverride.serviceItemId` as stable catalogue UUIDs, not SwiftData relationships
+- [x] Define SwiftData relationships only within user-owned data, including history and overrides belonging to a vehicle
+- [x] Confirm a `Vehicle` can be stored without a catalogue `VehicleSpecification`
 - [ ] Plan migration/compatibility for any development data created with the original six-model SwiftData prototype
 - [ ] Verify basic local persistence by creating, quitting and reopening the app
 
