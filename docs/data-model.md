@@ -625,6 +625,29 @@ the catalogue database.
 
 ---
 
+### Development migration policy
+
+The original six-model SwiftData schema was a development prototype and
+has not been distributed with production user data.
+
+Existing development `Vehicle` records may be retained when the schema
+changes permit automatic migration. Catalogue SwiftData records from the
+prototype are disposable because catalogue data will be rebuilt from the
+application-supplied SQLite database.
+
+Prototype `ServiceHistory` and `ServiceScheduleOverride` relationships
+to SwiftData `ServiceItem` records cannot be converted automatically
+into stable catalogue UUID references without an explicit mapping. No
+such records were created by the prototype application. If an
+incompatible development store is encountered, the application may be
+deleted from the Simulator to reset its local development data.
+
+Before distributing builds containing real user data, SwiftData schema
+changes must use an explicit versioning and migration strategy that
+preserves user-owned records.
+
+---
+
 ## CloudKit / iCloud considerations
 
 User data is intended to work locally/offline and synchronise between

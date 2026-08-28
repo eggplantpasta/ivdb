@@ -34,8 +34,8 @@
 - [x] Represent `ServiceHistory.serviceItemId` and `ServiceScheduleOverride.serviceItemId` as stable catalogue UUIDs, not SwiftData relationships
 - [x] Define SwiftData relationships only within user-owned data, including history and overrides belonging to a vehicle
 - [x] Confirm a `Vehicle` can be stored without a catalogue `VehicleSpecification`
-- [ ] Plan migration/compatibility for any development data created with the original six-model SwiftData prototype
-- [ ] Verify basic local persistence by creating, quitting and reopening the app
+- [x] Plan migration/compatibility for any development data created with the original six-model SwiftData prototype
+- [x] Verify basic local persistence by creating, quitting and reopening the app
 
 ## 4. Catalogue/reference data
 
