@@ -40,12 +40,12 @@
 ## 4. Catalogue/reference data
 
 - [x] Define Swift value types/DTOs for catalogue `VehicleSpecification`, `ServiceItem` and `ServiceSchedule` rows without making them SwiftData models
-- [ ] Build `catalogue.sqlite` from the catalogue schema and seed/import sources before application distribution
-- [ ] Populate `catalogue.sqlite` with the initial Honda CR-V vehicle specifications
-- [ ] Populate `catalogue.sqlite` with service items and recommended service schedules
-- [ ] Validate the built catalogue with `PRAGMA foreign_key_check` and automated integrity checks
-- [ ] Add indexes for vehicle-specification browsing/search, service-item lookup and schedule lookup by vehicle specification/service item
-- [ ] Verify representative catalogue queries with `EXPLAIN QUERY PLAN`
+- [x] Build `catalogue.sqlite` from the catalogue schema and seed/import sources before application distribution
+- [x] Populate `catalogue.sqlite` with the initial Honda CR-V vehicle specifications
+- [x] Populate `catalogue.sqlite` with service items and recommended service schedules
+- [x] Validate the built catalogue with `PRAGMA foreign_key_check` and automated integrity checks
+- [x] Add indexes for vehicle-specification browsing/search, service-item lookup and schedule lookup by vehicle specification/service item
+- [x] Verify representative catalogue queries with `EXPLAIN QUERY PLAN`
 - [ ] Add `catalogue.sqlite` to the application bundle and verify it is present in iPhone, iPad and macOS builds
 - [ ] Open the bundled catalogue read-only at runtime without copying or importing it into SwiftData
 - [ ] Implement a small catalogue query layer for lookup by UUID and for vehicle/service selection lists

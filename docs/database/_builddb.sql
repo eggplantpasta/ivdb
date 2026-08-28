@@ -15,4 +15,5 @@ PRAGMA foreign_keys = ON;
 
 .read seed.sql
 
+PRAGMA integrity_check;
 PRAGMA foreign_key_check;

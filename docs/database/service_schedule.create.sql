@@ -15,3 +15,6 @@ CREATE TABLE IF NOT EXISTS service_schedule (
 
     UNIQUE (vehicle_specification_id, service_item_id)
 );
+
+CREATE INDEX IF NOT EXISTS idx_service_schedule_service_item
+    ON service_schedule (service_item_id);

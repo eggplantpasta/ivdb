@@ -12,3 +12,6 @@ CREATE TABLE IF NOT EXISTS vehicle_specification (
     engine                   TEXT,
     transmission             TEXT
 );
+
+CREATE INDEX IF NOT EXISTS idx_vehicle_specification_make_model_years
+    ON vehicle_specification (make, model, year_from, year_to);

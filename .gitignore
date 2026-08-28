@@ -63,3 +63,4 @@ fastlane/test_output
 
 # other ignores
 docs/database/ivdb.db
+/docs/database/catalogue.sqlite
