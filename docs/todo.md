@@ -47,7 +47,7 @@
 - [x] Add indexes for vehicle-specification browsing/search, service-item lookup and schedule lookup by vehicle specification/service item
 - [x] Verify representative catalogue queries with `EXPLAIN QUERY PLAN`
 - [x] Add `catalogue.sqlite` to the application bundle and verify it is present in iPhone, iPad and macOS builds
-- [ ] Open the bundled catalogue read-only at runtime without copying or importing it into SwiftData
+- [x] Open the bundled catalogue read-only at runtime without copying or importing it into SwiftData
 - [ ] Implement a small catalogue query layer for lookup by UUID and for vehicle/service selection lists
 - [ ] Ensure query code handles a missing, unreadable or incompatible catalogue gracefully
 - [ ] Assign deterministic, stable UUIDs to every catalogue record
