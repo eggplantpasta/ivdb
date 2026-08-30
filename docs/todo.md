@@ -59,10 +59,10 @@
 
 ## 5. Basic app structure and navigation
 
-- [ ] Decide initial navigation structure for iPhone/iPad
-- [ ] Create the main vehicle list screen
-- [ ] Add an empty-state view when no vehicles exist
-- [ ] Add navigation from vehicle list to vehicle detail
+- [x] Decide initial navigation structure for iPhone/iPad
+- [x] Create the main vehicle list screen
+- [x] Add an empty-state view when no vehicles exist
+- [x] Add navigation from vehicle list to vehicle detail
 - [ ] Add a Settings/About area if needed
 - [ ] Check layouts on more than one iPhone simulator size
 - [ ] Check basic iPad layout
