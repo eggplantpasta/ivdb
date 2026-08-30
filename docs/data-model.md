@@ -447,6 +447,36 @@ Catalogue identifiers must remain stable between catalogue versions.
 
 Catalogue data is not synchronised through CloudKit.
 
+### Catalogue update compatibility
+
+A newer application version may replace the bundled catalogue database,
+but user-owned SwiftData records must remain resolvable across catalogue
+updates.
+
+The following compatibility rules apply:
+
+- An existing conceptual catalogue record must retain the same UUID when
+  its descriptive fields or schedule values are updated.
+- A UUID must never be reused for a different conceptual record.
+- New catalogue records receive new stable UUIDs.
+- The catalogue schema version changes when application query code would
+  need to interpret the database structure differently.
+- The catalogue data version changes whenever catalogue content changes,
+  even when the schema remains compatible.
+- The application opens only catalogue schema versions it explicitly
+  supports.
+- User-owned UUID references are preserved even when the current
+  catalogue cannot resolve them.
+
+Vehicle specifications and service items that may already be referenced
+by user data should not be deleted from later catalogue versions.
+Instead, they should be retained as deprecated records, excluded from
+new-selection lists but still available through UUID lookup.
+
+Service schedules are not referenced directly by user-owned records and
+may be replaced or removed, provided the stable UUIDs of their vehicle
+specifications and service items remain resolvable.
+
 ### User-owned data
 
 ```text

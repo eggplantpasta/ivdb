@@ -12,14 +12,17 @@ struct ServiceItem: Identifiable, Hashable {
 
     let name: String
     let itemDescription: String?
+    let isDeprecated: Bool
 
     init(
         id: UUID,
         name: String,
-        itemDescription: String? = nil
+        itemDescription: String? = nil,
+        isDeprecated: Bool = false
     ) {
         self.id = id
         self.name = name
         self.itemDescription = itemDescription
+        self.isDeprecated = isDeprecated
     }
 }

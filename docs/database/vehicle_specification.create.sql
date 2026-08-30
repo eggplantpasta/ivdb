@@ -9,9 +9,17 @@ CREATE TABLE IF NOT EXISTS vehicle_specification (
     series                   TEXT,
     trim                     TEXT,
     body_type                TEXT,
-    engine                   TEXT,
-    transmission             TEXT
+    engine                  TEXT,
+    transmission            TEXT,
+    is_deprecated           INTEGER NOT NULL DEFAULT 0
+                            CHECK (is_deprecated IN (0, 1))
 );
 
 CREATE INDEX IF NOT EXISTS idx_vehicle_specification_make_model_years
-    ON vehicle_specification (make, model, year_from, year_to);
+    ON vehicle_specification (
+        is_deprecated,
+        make,
+        model,
+        year_from,
+        year_to
+    );

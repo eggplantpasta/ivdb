@@ -50,7 +50,7 @@ extension CatalogueDatabaseError: LocalizedError {
 }
 
 final class CatalogueDatabase {
-    private static let supportedSchemaVersion = 1
+    private static let supportedSchemaVersion = 2
     
     private var connection: OpaquePointer?
 
@@ -165,7 +165,8 @@ final class CatalogueDatabase {
             trim: optionalText(from: statement, at: 7),
             bodyType: optionalText(from: statement, at: 8),
             engine: optionalText(from: statement, at: 9),
-            transmission: optionalText(from: statement, at: 10)
+            transmission: optionalText(from: statement, at: 10),
+            isDeprecated: sqlite3_column_int(statement, 11) != 0
         )
     }
     
@@ -182,8 +183,10 @@ final class CatalogueDatabase {
                 trim,
                 body_type,
                 engine,
-                transmission
+                transmission,
+                is_deprecated
             FROM vehicle_specification
+            WHERE is_deprecated = 0
             ORDER BY make, model, year_from
             """
         
@@ -240,7 +243,8 @@ final class CatalogueDatabase {
                 trim,
                 body_type,
                 engine,
-                transmission
+                transmission,
+                is_deprecated
             FROM vehicle_specification
             WHERE vehicle_specification_id = ?
             LIMIT 1
@@ -306,14 +310,16 @@ final class CatalogueDatabase {
         return ServiceItem(
             id: id,
             name: String(cString: nameText),
-            itemDescription: optionalText(from: statement, at: 2)
+            itemDescription: optionalText(from: statement, at: 2),
+            isDeprecated: sqlite3_column_int(statement, 3) != 0
         )
     }
     
     func fetchServiceItems() throws -> [ServiceItem] {
         let sql = """
-            SELECT service_item_id, name, description
+            SELECT service_item_id, name, description, is_deprecated
             FROM service_item
+            WHERE is_deprecated = 0
             ORDER BY name
             """
 
@@ -359,7 +365,7 @@ final class CatalogueDatabase {
         id: UUID
     ) throws -> ServiceItem? {
         let sql = """
-            SELECT service_item_id, name, description
+            SELECT service_item_id, name, description, is_deprecated
             FROM service_item
             WHERE service_item_id = ?
             LIMIT 1

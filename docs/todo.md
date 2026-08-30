@@ -50,11 +50,11 @@
 - [x] Open the bundled catalogue read-only at runtime without copying or importing it into SwiftData
 - [x] Implement a small catalogue query layer for lookup by UUID and for vehicle/service selection lists
 - [x] Ensure query code handles a missing, unreadable or incompatible catalogue gracefully
-- [ ] Assign deterministic, stable UUIDs to every catalogue record
-- [ ] Ensure catalogue UUIDs never change when the database is rebuilt or an existing record is updated
+- [x] Assign deterministic, stable UUIDs to every catalogue record
+- [x] Ensure catalogue UUIDs never change when the database is rebuilt or an existing record is updated
 - [x] Add explicit catalogue schema/data version metadata
-- [ ] Define compatibility rules for replacing `catalogue.sqlite` in application updates while preserving UUID references held by user data
-- [ ] Decide how removed/deprecated catalogue records remain resolvable, or how unresolved UUIDs are represented in the UI
+- [x] Define compatibility rules for replacing `catalogue.sqlite` in application updates while preserving UUID references held by user data
+- [x] Decide how removed/deprecated catalogue records remain resolvable, or how unresolved UUIDs are represented in the UI
 - [ ] Add a repeatable catalogue build command/script suitable for local development and release builds
 
 ## 5. Basic app structure and navigation

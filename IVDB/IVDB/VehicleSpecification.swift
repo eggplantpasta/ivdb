@@ -20,6 +20,7 @@ struct VehicleSpecification: Identifiable, Hashable {
     let bodyType: String?
     let engine: String?
     let transmission: String?
+    let isDeprecated: Bool
 
     init(
         id: UUID,
@@ -32,7 +33,8 @@ struct VehicleSpecification: Identifiable, Hashable {
         trim: String? = nil,
         bodyType: String? = nil,
         engine: String? = nil,
-        transmission: String? = nil
+        transmission: String? = nil,
+        isDeprecated: Bool = false
     ) {
         self.id = id
         self.make = make
@@ -45,5 +47,6 @@ struct VehicleSpecification: Identifiable, Hashable {
         self.bodyType = bodyType
         self.engine = engine
         self.transmission = transmission
+        self.isDeprecated = isDeprecated
     }
 }
