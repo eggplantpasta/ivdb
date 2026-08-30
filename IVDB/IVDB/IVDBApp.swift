@@ -19,5 +19,10 @@ struct IVDBApp: App {
             ServiceScheduleOverride.self,
             ServiceHistory.self
         ])
+        #if os(macOS)
+        Settings {
+            SettingsView()
+        }
+        #endif
     }
 }

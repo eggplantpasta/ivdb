@@ -63,9 +63,9 @@
 - [x] Create the main vehicle list screen
 - [x] Add an empty-state view when no vehicles exist
 - [x] Add navigation from vehicle list to vehicle detail
-- [ ] Add a Settings/About area if needed
-- [ ] Check layouts on more than one iPhone simulator size
-- [ ] Check basic iPad layout
+- [x] Add a Settings/About area if needed
+- [x] Check layouts on more than one iPhone simulator size
+- [x] Check basic iPad layout
 
 ## 6. Vehicle management
 

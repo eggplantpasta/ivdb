@@ -5,6 +5,7 @@ struct VehicleListView: View {
     @Environment(\.modelContext) private var modelContext
     @Query private var vehicles: [Vehicle]
     @Binding var selection: Vehicle?
+    @State private var isShowingSettings = false
 
     var body: some View {
         Group {
@@ -29,9 +30,26 @@ struct VehicleListView: View {
             }
         }
         .toolbar {
-            Button(action: addVehicle) {
-                Label("Add My CR-V", systemImage: "plus")
+            #if os(iOS)
+            ToolbarItem(placement: .primaryAction) {
+                Button {
+                    isShowingSettings = true
+                } label: {
+                    Label("Settings", systemImage: "gearshape")
+                }
             }
+            #endif
+
+            ToolbarItem(placement: .primaryAction) {
+                Button(action: addVehicle) {
+                    Image(systemName: "plus")
+                        .accessibilityLabel("Add Vehicle")
+                }
+                .help("Add Vehicle")
+            }
+        }
+        .sheet(isPresented: $isShowingSettings) {
+            SettingsView()
         }
     }
     
