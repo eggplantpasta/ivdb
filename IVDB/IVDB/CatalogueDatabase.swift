@@ -18,9 +18,40 @@ enum CatalogueDatabaseError: Error {
     case openFailed(String)
     case queryFailed(String)
     case invalidData(String)
+    case missingMetadata
+    case unsupportedSchemaVersion(found: Int, supported: Int)
+}
+
+extension CatalogueDatabaseError: LocalizedError {
+    var errorDescription: String? {
+        switch self {
+        case .databaseNotFound:
+            return "The vehicle catalogue is missing."
+
+        case .openFailed(let message):
+            return "The vehicle catalogue could not be opened: \(message)"
+
+        case .queryFailed(let message):
+            return "The vehicle catalogue query failed: \(message)"
+
+        case .invalidData(let message):
+            return "The vehicle catalogue contains invalid data: \(message)"
+
+        case .missingMetadata:
+            return "The vehicle catalogue has no compatibility information."
+
+        case .unsupportedSchemaVersion(let found, let supported):
+            return """
+                The vehicle catalogue uses schema version \(found), \
+                but this app supports version \(supported).
+                """
+        }
+    }
 }
 
 final class CatalogueDatabase {
+    private static let supportedSchemaVersion = 1
+    
     private var connection: OpaquePointer?
 
     init(bundle: Bundle = .main) throws {
@@ -53,8 +84,62 @@ final class CatalogueDatabase {
         }
 
         connection = database
+
+        do {
+            try validateCompatibility()
+        } catch {
+            sqlite3_close(connection)
+            connection = nil
+            throw error
+        }
     }
     
+    private func validateCompatibility() throws {
+        let sql = """
+            SELECT schema_version
+            FROM catalogue_metadata
+            WHERE metadata_id = 1
+            """
+
+        var statement: OpaquePointer?
+
+        guard sqlite3_prepare_v2(
+            connection,
+            sql,
+            -1,
+            &statement,
+            nil
+        ) == SQLITE_OK else {
+            throw CatalogueDatabaseError.missingMetadata
+        }
+
+        defer {
+            sqlite3_finalize(statement)
+        }
+
+        switch sqlite3_step(statement) {
+        case SQLITE_ROW:
+            let foundVersion = Int(
+                sqlite3_column_int64(statement, 0)
+            )
+
+            guard foundVersion == Self.supportedSchemaVersion else {
+                throw CatalogueDatabaseError.unsupportedSchemaVersion(
+                    found: foundVersion,
+                    supported: Self.supportedSchemaVersion
+                )
+            }
+
+        case SQLITE_DONE:
+            throw CatalogueDatabaseError.missingMetadata
+
+        default:
+            throw CatalogueDatabaseError.queryFailed(
+                String(cString: sqlite3_errmsg(connection))
+            )
+        }
+    }
+
     private func vehicleSpecification(
         from statement: OpaquePointer?
     ) throws -> VehicleSpecification {

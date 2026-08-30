@@ -3,6 +3,21 @@ PRAGMA foreign_keys = ON;
 BEGIN TRANSACTION;
 
 -- ============================================================
+-- Catalogue metadata
+-- ============================================================
+
+INSERT INTO catalogue_metadata (
+    metadata_id,
+    schema_version,
+    data_version
+)
+VALUES (
+    1,
+    1,
+    1
+);
+
+-- ============================================================
 -- Vehicle specifications
 -- ============================================================
 

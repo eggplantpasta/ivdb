@@ -9,6 +9,7 @@
 
 PRAGMA foreign_keys = ON;
 
+.read catalogue_metadata.create.sql
 .read vehicle_specification.create.sql
 .read service_item.create.sql
 .read service_schedule.create.sql
