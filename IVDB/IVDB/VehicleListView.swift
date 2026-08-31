@@ -6,6 +6,7 @@ struct VehicleListView: View {
     @Query private var vehicles: [Vehicle]
     @Binding var selection: Vehicle?
     @State private var isShowingSettings = false
+    @State private var isShowingAddVehicle = false
 
     var body: some View {
         Group {
@@ -41,7 +42,9 @@ struct VehicleListView: View {
             #endif
 
             ToolbarItem(placement: .primaryAction) {
-                Button(action: addVehicle) {
+                Button {
+                    isShowingAddVehicle = true
+                } label: {
                     Image(systemName: "plus")
                         .accessibilityLabel("Add Vehicle")
                 }
@@ -51,17 +54,9 @@ struct VehicleListView: View {
         .sheet(isPresented: $isShowingSettings) {
             SettingsView()
         }
-    }
-    
-    private func addVehicle() {
-        let vehicle = Vehicle(
-            name: "My CR-V",
-            registration: "1ABC234",
-            colour: "Silver",
-            buildYear: 2012
-        )
-
-        modelContext.insert(vehicle)
+        .sheet(isPresented: $isShowingAddVehicle) {
+            AddVehicleView()
+        }
     }
 }
 
