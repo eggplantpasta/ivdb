@@ -65,3 +65,5 @@ fastlane/test_output
 docs/database/ivdb.db
 /docs/database/catalogue.sqlite
 .DS_Store
+docs/database/ivdb-doc.sqlite
+docs/database/dump.sql
