@@ -9,6 +9,8 @@ import SwiftUI
 import SwiftData
 
 struct VehicleDetailView: View {
+    @State private var isShowingEditVehicle = false
+    
     let vehicle: Vehicle
 
     var body: some View {
@@ -59,6 +61,20 @@ struct VehicleDetailView: View {
             }
         }
         .navigationTitle(vehicle.name)
+        .toolbar {
+            ToolbarItem(placement: .primaryAction) {
+                Button {
+                    isShowingEditVehicle = true
+                } label: {
+                    Image(systemName: "pencil")
+                        .accessibilityLabel("Edit Vehicle")
+                }
+                .help("Edit Vehicle")
+            }
+        }
+        .sheet(isPresented: $isShowingEditVehicle) {
+            VehicleFormView(vehicle: vehicle)
+        }
     }
 }
 

@@ -71,7 +71,7 @@
 
 - [x] Display user vehicles
 - [x] Add a vehicle
-- [ ] Edit a vehicle
+- [x] Edit a vehicle
 - [ ] Delete a vehicle with confirmation
 - [ ] Query `catalogue.sqlite` for vehicle specification selection and search
 - [ ] Store the selected specification's stable UUID in `Vehicle.vehicleSpecificationId`

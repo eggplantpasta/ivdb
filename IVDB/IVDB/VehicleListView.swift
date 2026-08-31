@@ -55,7 +55,7 @@ struct VehicleListView: View {
             SettingsView()
         }
         .sheet(isPresented: $isShowingAddVehicle) {
-            AddVehicleView()
+            VehicleFormView()
         }
     }
 }
