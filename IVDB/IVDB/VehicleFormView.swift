@@ -27,6 +27,7 @@ struct VehicleFormView: View {
     @State private var selectedVehicleSpecificationId: UUID?
     @State private var vehicleSpecifications: [VehicleSpecification] = []
     @State private var catalogueErrorMessage: String?
+    @State private var isShowingSpecificationPicker = false
     
     init(vehicle: Vehicle? = nil) {
         self.vehicle = vehicle
@@ -50,21 +51,44 @@ struct VehicleFormView: View {
     private var canSave: Bool {
         !name.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
     }
+    
+    private var selectedVehicleSpecification:
+        VehicleSpecification? {
+        guard let selectedVehicleSpecificationId else {
+            return nil
+        }
+
+        return vehicleSpecifications.first {
+            $0.id == selectedVehicleSpecificationId
+        }
+    }
 
     var body: some View {
         NavigationStack {
             Form {
                 Section("Catalogue specification") {
-                    Picker(
-                        "Specification",
-                        selection: $selectedVehicleSpecificationId
-                    ) {
-                        Text("Not listed")
-                            .tag(nil as UUID?)
+                    Button {
+                        if vehicleSpecifications.isEmpty {
+                            loadVehicleSpecifications()
+                        }
 
-                        ForEach(vehicleSpecifications) { specification in
-                            Text(specification.displayName)
-                                .tag(specification.id as UUID?)
+                        isShowingSpecificationPicker = true
+                    } label: {
+                        HStack {
+                            Text("Specification")
+                                .foregroundStyle(.primary)
+
+                            Spacer()
+
+                            Text(
+                                selectedVehicleSpecification?.displayName
+                                    ?? "Not listed"
+                            )
+                            .foregroundStyle(.secondary)
+
+                            Image(systemName: "chevron.right")
+                                .font(.caption)
+                                .foregroundStyle(.tertiary)
                         }
                     }
 
@@ -118,6 +142,21 @@ struct VehicleFormView: View {
             } message: {
                 Text(saveErrorMessage)
             }
+            .sheet(isPresented: $isShowingSpecificationPicker) {
+                NavigationStack {
+                    VehicleSpecificationPickerView(
+                        specifications: $vehicleSpecifications,
+                        selection: $selectedVehicleSpecificationId
+                    )
+                    .toolbar {
+                        ToolbarItem(placement: .cancellationAction) {
+                            Button("Cancel") {
+                                isShowingSpecificationPicker = false
+                            }
+                        }
+                    }
+                }
+            }
         }
     }
 
@@ -158,14 +197,17 @@ struct VehicleFormView: View {
     }
     
     private func loadVehicleSpecifications() {
+        catalogueErrorMessage = nil
+
         do {
             let catalogue = try CatalogueDatabase()
-            vehicleSpecifications = try catalogue.fetchVehicleSpecifications()
+            vehicleSpecifications =
+                try catalogue.fetchVehicleSpecifications()
         } catch {
             catalogueErrorMessage = error.localizedDescription
         }
     }
-
+    
     private func optionalText(_ value: String) -> String? {
         let trimmed = value.trimmingCharacters(
             in: .whitespacesAndNewlines
