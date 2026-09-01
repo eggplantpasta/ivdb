@@ -21,6 +21,25 @@ struct VehicleSpecification: Identifiable, Hashable {
     let engine: String?
     let transmission: String?
     let isDeprecated: Bool
+    
+    var displayName: String {
+        var label = "\(make) \(model)"
+
+        if let yearFrom {
+            if let yearTo,
+               yearTo != yearFrom {
+                label += " \(yearFrom)–\(yearTo)"
+            } else {
+                label += " \(yearFrom)"
+            }
+        }
+
+        if let series {
+            label += " \(series)"
+        }
+
+        return label
+    }
 
     init(
         id: UUID,

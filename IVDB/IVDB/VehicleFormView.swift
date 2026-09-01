@@ -24,8 +24,16 @@ struct VehicleFormView: View {
     @State private var isShowingSaveError = false
     @State private var saveErrorMessage = ""
     
+    @State private var selectedVehicleSpecificationId: UUID?
+    @State private var vehicleSpecifications: [VehicleSpecification] = []
+    @State private var catalogueErrorMessage: String?
+    
     init(vehicle: Vehicle? = nil) {
         self.vehicle = vehicle
+        
+        _selectedVehicleSpecificationId = State(
+            initialValue: vehicle?.vehicleSpecificationId
+        )
 
         _name = State(initialValue: vehicle?.name ?? "")
         _registration = State(
@@ -46,6 +54,25 @@ struct VehicleFormView: View {
     var body: some View {
         NavigationStack {
             Form {
+                Section("Catalogue specification") {
+                    Picker(
+                        "Specification",
+                        selection: $selectedVehicleSpecificationId
+                    ) {
+                        Text("Not listed")
+                            .tag(nil as UUID?)
+
+                        ForEach(vehicleSpecifications) { specification in
+                            Text(specification.displayName)
+                                .tag(specification.id as UUID?)
+                        }
+                    }
+
+                    if let catalogueErrorMessage {
+                        Text(catalogueErrorMessage)
+                            .foregroundStyle(.red)
+                    }
+                }
                 Section("Vehicle") {
                     TextField("Name", text: $name)
                     TextField("Registration", text: $registration)
@@ -80,6 +107,9 @@ struct VehicleFormView: View {
                     .disabled(!canSave)
                 }
             }
+            .task {
+                loadVehicleSpecifications()
+            }
             .alert(
                 "Could Not Save Vehicle",
                 isPresented: $isShowingSaveError
@@ -97,6 +127,7 @@ struct VehicleFormView: View {
         )
 
         if let vehicle {
+            vehicle.vehicleSpecificationId = selectedVehicleSpecificationId
             vehicle.name = trimmedName
             vehicle.registration = optionalText(registration)
             vehicle.vin = optionalText(vin)
@@ -105,6 +136,7 @@ struct VehicleFormView: View {
             vehicle.notes = optionalText(notes)
         } else {
             let newVehicle = Vehicle(
+                vehicleSpecificationId: selectedVehicleSpecificationId,
                 name: trimmedName,
                 registration: optionalText(registration),
                 vin: optionalText(vin),
@@ -122,6 +154,15 @@ struct VehicleFormView: View {
         } catch {
             saveErrorMessage = error.localizedDescription
             isShowingSaveError = true
+        }
+    }
+    
+    private func loadVehicleSpecifications() {
+        do {
+            let catalogue = try CatalogueDatabase()
+            vehicleSpecifications = try catalogue.fetchVehicleSpecifications()
+        } catch {
+            catalogueErrorMessage = error.localizedDescription
         }
     }
 
