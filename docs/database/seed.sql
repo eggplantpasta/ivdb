@@ -14,7 +14,7 @@ INSERT INTO catalogue_metadata (
 VALUES (
     1,
     2,
-    2
+    3
 );
 
 -- ============================================================
@@ -34,7 +34,8 @@ INSERT INTO vehicle_specification (
     engine,
     transmission
 )
-VALUES (
+VALUES
+(
     'a0000000-0000-0000-0000-000000000001',
     'Honda',
     'CR-V',
@@ -46,6 +47,58 @@ VALUES (
     'SUV',
     'K24Z1 2.4L I4 DOHC VTEC',
     'Automatic'
+),
+(
+    'a0000000-0000-0000-0000-000000000002',
+    'Honda',
+    'Jazz',
+    'First generation',
+    2004,
+    2004,
+    'GD1',
+    NULL,
+    'Hatchback',
+    '1.3L I4',
+    'Automatic'
+),
+(
+    'a0000000-0000-0000-0000-000000000003',
+    'Toyota',
+    'Corolla',
+    'Tenth generation',
+    2010,
+    2010,
+    'ZRE152R',
+    NULL,
+    'Hatchback',
+    '1.8L I4',
+    'Automatic'
+),
+(
+    'a0000000-0000-0000-0000-000000000004',
+    'Toyota',
+    'Kluger',
+    'Second generation',
+    2012,
+    2012,
+    'GSU40R',
+    NULL,
+    'SUV',
+    '3.5L V6',
+    'Automatic'
+),
+(
+    'a0000000-0000-0000-0000-000000000005',
+    'Renault',
+    '12',
+    'First generation',
+    1976,
+    1976,
+    NULL,
+    NULL,
+    'Station wagon',
+    '1.3L I4',
+    'Manual'
 );
 
 
