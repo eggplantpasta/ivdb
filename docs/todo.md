@@ -72,12 +72,12 @@
 - [x] Display user vehicles
 - [x] Add a vehicle
 - [x] Edit a vehicle
-- [ ] Delete a vehicle with confirmation
+- [x] Delete a vehicle with confirmation
 - [ ] Query `catalogue.sqlite` for vehicle specification selection and search
 - [ ] Store the selected specification's stable UUID in `Vehicle.vehicleSpecificationId`
 - [ ] Resolve `vehicleSpecificationId` through the catalogue query layer when displaying a vehicle
 - [ ] Handle a missing/unresolved catalogue specification UUID without losing the user's vehicle data
-- [ ] Allow creation of a vehicle without a matching catalogue specification
+- [x] Allow creation of a vehicle without a matching catalogue specification
 - [x] Capture name, registration, VIN, colour, build year and notes
 - [ ] Validate required fields and sensible year values
 - [x] Create vehicle detail view

@@ -16,7 +16,10 @@ struct RootView: View {
                 .navigationTitle("My Vehicles")
         } detail: {
             if let selectedVehicle {
-                VehicleDetailView(vehicle: selectedVehicle)
+                VehicleDetailView(
+                    vehicle: selectedVehicle,
+                    selection: $selectedVehicle
+                )
             } else {
                 ContentUnavailableView(
                     "No Vehicle Selected",
