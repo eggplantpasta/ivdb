@@ -79,7 +79,7 @@
 - [x] Handle a missing/unresolved catalogue specification UUID without losing the user's vehicle data
 - [x] Allow creation of a vehicle without a matching catalogue specification
 - [x] Capture name, registration, VIN, colour, build year and notes
-- [ ] Validate required fields and sensible year values
+- [x] Validate required fields and sensible year values
 - [x] Create vehicle detail view
 
 ## 7. Service history
