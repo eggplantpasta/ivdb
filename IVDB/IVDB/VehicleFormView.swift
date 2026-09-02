@@ -48,8 +48,49 @@ struct VehicleFormView: View {
         _notes = State(initialValue: vehicle?.notes ?? "")
     }
 
+    private var trimmedName: String {
+        name.trimmingCharacters(in: .whitespacesAndNewlines)
+    }
+
+    private var parsedBuildYear: Int? {
+        let trimmedYear = buildYear.trimmingCharacters(
+            in: .whitespacesAndNewlines
+        )
+
+        guard !trimmedYear.isEmpty else {
+            return nil
+        }
+
+        return Int(trimmedYear)
+    }
+
+    private var buildYearValidationMessage: String? {
+        let trimmedYear = buildYear.trimmingCharacters(
+            in: .whitespacesAndNewlines
+        )
+
+        guard !trimmedYear.isEmpty else {
+            return nil
+        }
+
+        guard let parsedBuildYear else {
+            return "Enter a valid year."
+        }
+
+        let latestReasonableYear = Calendar.current.component(
+            .year,
+            from: Date()
+        ) + 1
+
+        guard (1886...latestReasonableYear).contains(parsedBuildYear) else {
+            return "Enter a year from 1886 to \(latestReasonableYear)."
+        }
+
+        return nil
+    }
+
     private var canSave: Bool {
-        !name.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+        !trimmedName.isEmpty && buildYearValidationMessage == nil
     }
     
     private var selectedVehicleSpecification:
@@ -103,6 +144,13 @@ struct VehicleFormView: View {
                     TextField("VIN", text: $vin)
                     TextField("Colour", text: $colour)
                     TextField("Build year", text: $buildYear)
+                        .keyboardType(.numberPad)
+
+                    if let buildYearValidationMessage {
+                        Text(buildYearValidationMessage)
+                            .font(.caption)
+                            .foregroundStyle(.red)
+                    }
                 }
 
                 Section("Notes") {
@@ -161,9 +209,9 @@ struct VehicleFormView: View {
     }
 
     private func save() {
-        let trimmedName = name.trimmingCharacters(
-            in: .whitespacesAndNewlines
-        )
+        guard canSave else {
+            return
+        }
 
         if let vehicle {
             vehicle.vehicleSpecificationId = selectedVehicleSpecificationId
@@ -171,7 +219,7 @@ struct VehicleFormView: View {
             vehicle.registration = optionalText(registration)
             vehicle.vin = optionalText(vin)
             vehicle.colour = optionalText(colour)
-            vehicle.buildYear = Int(buildYear)
+            vehicle.buildYear = parsedBuildYear
             vehicle.notes = optionalText(notes)
         } else {
             let newVehicle = Vehicle(
@@ -180,7 +228,7 @@ struct VehicleFormView: View {
                 registration: optionalText(registration),
                 vin: optionalText(vin),
                 colour: optionalText(colour),
-                buildYear: Int(buildYear),
+                buildYear: parsedBuildYear,
                 notes: optionalText(notes)
             )
 

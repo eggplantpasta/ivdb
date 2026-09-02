@@ -73,7 +73,7 @@
 - [x] Add a vehicle
 - [x] Edit a vehicle
 - [x] Delete a vehicle with confirmation
-- [ ] Query `catalogue.sqlite` for vehicle specification selection and search
+- [x] Query `catalogue.sqlite` for vehicle specification selection and search
 - [x] Store the selected specification's stable UUID in `Vehicle.vehicleSpecificationId`
 - [x] Resolve `vehicleSpecificationId` through the catalogue query layer when displaying a vehicle
 - [x] Handle a missing/unresolved catalogue specification UUID without losing the user's vehicle data
