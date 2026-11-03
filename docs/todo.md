@@ -84,21 +84,21 @@
 
 ## 7. Service history
 
-- [ ] Display service history for a vehicle
-- [ ] Sort service history sensibly, newest first by default
-- [ ] Record a service history item
-- [ ] Query `catalogue.sqlite` to select the applicable `ServiceItem`
-- [ ] Store the selected service item's stable UUID in `ServiceHistory.serviceItemId`
-- [ ] Resolve service item UUIDs through the catalogue query layer when displaying history
-- [ ] Handle a missing/unresolved service item UUID without losing the history record
-- [ ] Capture service date
-- [ ] Capture optional odometer kilometres
-- [ ] Capture optional `performedBy`
-- [ ] Capture optional cost
-- [ ] Capture optional notes
-- [ ] Edit a service history item
-- [ ] Delete a service history item with confirmation
-- [ ] Confirm one history record represents one maintenance action rather than a workshop visit
+- [x] Display service history for a vehicle
+- [x] Sort service history sensibly, newest first by default
+- [x] Record a service history item
+- [x] Query `catalogue.sqlite` to select the applicable `ServiceItem`
+- [x] Store the selected service item's stable UUID in `ServiceHistory.serviceItemId`
+- [x] Resolve service item UUIDs through the catalogue query layer when displaying history
+- [x] Handle a missing/unresolved service item UUID without losing the history record
+- [x] Capture service date
+- [x] Capture optional odometer kilometres
+- [x] Capture optional `performedBy`
+- [x] Capture optional cost
+- [x] Capture optional notes
+- [x] Edit a service history item
+- [x] Delete a service history item with confirmation
+- [x] Confirm one history record represents one maintenance action rather than a workshop visit
 
 ## 8. Service schedules and due calculations
 
