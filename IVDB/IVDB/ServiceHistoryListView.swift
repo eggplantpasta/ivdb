@@ -7,6 +7,7 @@ struct ServiceHistoryListView: View {
     @Query private var history: [ServiceHistory]
     @State private var serviceItemNames: [UUID: String] = [:]
     @State private var catalogueErrorMessage: String?
+    @State private var isShowingAddServiceHistory = false
 
     init(vehicle: Vehicle) {
         self.vehicle = vehicle
@@ -71,6 +72,19 @@ struct ServiceHistoryListView: View {
             }
         }
         .navigationTitle("Service History")
+        .toolbar {
+            ToolbarItem(placement: .primaryAction) {
+                Button {
+                    isShowingAddServiceHistory = true
+                } label: {
+                    Label("Add Service History", systemImage: "plus")
+                }
+                .help("Add Service History")
+            }
+        }
+        .sheet(isPresented: $isShowingAddServiceHistory) {
+            ServiceHistoryFormView(vehicle: vehicle)
+        }
         .task(id: serviceItemIds) {
             loadServiceItemNames()
         }
