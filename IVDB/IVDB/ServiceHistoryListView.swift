@@ -4,6 +4,14 @@ import SwiftData
 struct ServiceHistoryListView: View {
     let vehicle: Vehicle
 
+    @Environment(\.modelContext) private var modelContext
+    @Environment(\.locale) private var locale
+    @State private var editingRecord: ServiceHistory?
+    @State private var recordToDelete: ServiceHistory?
+    @State private var isShowingDeleteConfirmation = false
+    @State private var isShowingDeleteError = false
+    @State private var deleteErrorMessage = ""
+
     @Query private var history: [ServiceHistory]
     @State private var serviceItemNames: [UUID: String] = [:]
     @State private var catalogueErrorMessage: String?
@@ -63,10 +71,33 @@ struct ServiceHistoryListView: View {
 
                 Section(vehicle.name) {
                     ForEach(sortedHistory) { record in
-                        ServiceHistoryRow(
-                            record: record,
-                            serviceItemName: serviceItemNames[record.serviceItemId]
-                        )
+                        Button {
+                            editingRecord = record
+                        } label: {
+                            ServiceHistoryRow(
+                                record: record,
+                                serviceItemName: serviceItemNames[record.serviceItemId]
+                            )
+                            .frame(maxWidth: .infinity, alignment: .leading)
+                            .contentShape(Rectangle())
+                        }
+                        .buttonStyle(.plain)
+                        .accessibilityHint("Edit service history")
+                        .contextMenu {
+                            Button("Edit", systemImage: "pencil") {
+                                editingRecord = record
+                            }
+                            Button("Delete", systemImage: "trash", role: .destructive) {
+                                requestDeletion(of: record)
+                            }
+                        }
+                        #if os(iOS)
+                        .swipeActions(edge: .trailing, allowsFullSwipe: false) {
+                            Button("Delete", systemImage: "trash", role: .destructive) {
+                                requestDeletion(of: record)
+                            }
+                        }
+                        #endif
                     }
                 }
             }
@@ -83,10 +114,50 @@ struct ServiceHistoryListView: View {
             }
         }
         .sheet(isPresented: $isShowingAddServiceHistory) {
-            ServiceHistoryFormView(vehicle: vehicle)
+            ServiceHistoryFormView(vehicle: vehicle, locale: locale)
+        }
+        .sheet(item: $editingRecord) { record in
+            ServiceHistoryFormView(vehicle: vehicle, record: record, locale: locale)
+        }
+        .confirmationDialog(
+            "Delete Service History?",
+            isPresented: $isShowingDeleteConfirmation,
+            titleVisibility: .visible,
+            presenting: recordToDelete
+        ) { record in
+            Button("Delete", role: .destructive) {
+                deleteRecord(record)
+            }
+            Button("Cancel", role: .cancel) {
+                recordToDelete = nil
+            }
+        } message: { record in
+            Text("Permanently delete the service record dated \(record.serviceDate, format: .dateTime.day().month().year())? This cannot be undone.")
+        }
+        .alert("Could Not Delete Service History", isPresented: $isShowingDeleteError) {
+            Button("OK", role: .cancel) {}
+        } message: {
+            Text(deleteErrorMessage)
         }
         .task(id: serviceItemIds) {
             loadServiceItemNames()
+        }
+    }
+
+    private func requestDeletion(of record: ServiceHistory) {
+        recordToDelete = record
+        isShowingDeleteConfirmation = true
+    }
+
+    private func deleteRecord(_ record: ServiceHistory) {
+        recordToDelete = nil
+        modelContext.delete(record)
+        do {
+            try modelContext.save()
+        } catch {
+            modelContext.rollback()
+            deleteErrorMessage = error.localizedDescription
+            isShowingDeleteError = true
         }
     }
 

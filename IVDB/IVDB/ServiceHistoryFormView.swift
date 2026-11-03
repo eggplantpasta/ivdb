@@ -7,6 +7,7 @@ struct ServiceHistoryFormView: View {
     @Environment(\.locale) private var locale
 
     let vehicle: Vehicle
+    private let record: ServiceHistory?
 
     @State private var serviceItems: [ServiceItem] = []
     @State private var selectedServiceItemId: UUID?
@@ -18,6 +19,23 @@ struct ServiceHistoryFormView: View {
     @State private var catalogueErrorMessage: String?
     @State private var isShowingSaveError = false
     @State private var saveErrorMessage = ""
+
+    init(vehicle: Vehicle, record: ServiceHistory? = nil, locale: Locale = .current) {
+        self.vehicle = vehicle
+        self.record = record
+        _selectedServiceItemId = State(initialValue: record?.serviceItemId)
+        _serviceDate = State(initialValue: record?.serviceDate ?? Date())
+        _odometerKm = State(initialValue: record?.odometerKm.map(String.init) ?? "")
+        _performedBy = State(initialValue: record?.performedBy ?? "")
+        _cost = State(initialValue: record?.cost.map {
+            $0.formatted(
+                .number.grouping(.never)
+                    .precision(.significantDigits(1...17))
+                    .locale(locale)
+            )
+        } ?? "")
+        _notes = State(initialValue: record?.notes ?? "")
+    }
 
     private var parsedOdometer: Int? {
         guard let text = optionalText(odometerKm),
@@ -54,8 +72,9 @@ struct ServiceHistoryFormView: View {
     }
 
     private var canSave: Bool {
-        serviceItems.contains { $0.id == selectedServiceItemId }
-            && isOdometerValid && isCostValid
+        let hasServiceItem = serviceItems.contains { $0.id == selectedServiceItemId }
+            || (record != nil && selectedServiceItemId == record?.serviceItemId)
+        return hasServiceItem && isOdometerValid && isCostValid
     }
 
     var body: some View {
@@ -65,6 +84,10 @@ struct ServiceHistoryFormView: View {
                     LabeledContent("Vehicle", value: vehicle.name)
                     Picker("Service item", selection: $selectedServiceItemId) {
                         Text("Select a service item").tag(nil as UUID?)
+                        if let record, !serviceItems.contains(where: { $0.id == record.serviceItemId }) {
+                            Text("Existing service item unavailable")
+                                .tag(Optional(record.serviceItemId))
+                        }
                         ForEach(serviceItems) { item in
                             Text(item.name).tag(Optional(item.id))
                         }
@@ -113,7 +136,7 @@ struct ServiceHistoryFormView: View {
                         .lineLimit(3...6)
                 }
             }
-            .navigationTitle("Add Service History")
+            .navigationTitle(record == nil ? "Add Service History" : "Edit Service History")
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
                     Button("Cancel") {
@@ -143,7 +166,16 @@ struct ServiceHistoryFormView: View {
         do {
             let catalogue = try CatalogueDatabase()
             serviceItems = try catalogue.fetchServiceItems()
-            if serviceItems.isEmpty {
+            // Selection lists exclude deprecated items, but existing history must
+            // still resolve its original item through the UUID lookup.
+            if let record, !serviceItems.contains(where: { $0.id == record.serviceItemId }) {
+                if let existingItem = try catalogue.fetchServiceItem(id: record.serviceItemId) {
+                    serviceItems.append(existingItem)
+                } else {
+                    catalogueErrorMessage = "The original service item is unavailable. You can keep it or select another item."
+                }
+            }
+            if serviceItems.isEmpty && record == nil {
                 catalogueErrorMessage = "No service items are available in the catalogue. A service item is required to save history."
             }
         } catch {
@@ -157,22 +189,44 @@ struct ServiceHistoryFormView: View {
             return
         }
 
-        let record = ServiceHistory(
+        let savedRecord = record ?? ServiceHistory(
             vehicle: vehicle,
             serviceItemId: selectedServiceItemId,
-            serviceDate: serviceDate,
-            odometerKm: parsedOdometer,
-            performedBy: optionalText(performedBy),
-            cost: parsedCost,
-            notes: optionalText(notes)
+            serviceDate: serviceDate
         )
-        modelContext.insert(record)
+        let original = (
+            serviceItemId: savedRecord.serviceItemId,
+            serviceDate: savedRecord.serviceDate,
+            odometerKm: savedRecord.odometerKm,
+            performedBy: savedRecord.performedBy,
+            cost: savedRecord.cost,
+            notes: savedRecord.notes
+        )
+        savedRecord.serviceItemId = selectedServiceItemId
+        savedRecord.serviceDate = serviceDate
+        savedRecord.odometerKm = parsedOdometer
+        savedRecord.performedBy = optionalText(performedBy)
+        savedRecord.cost = parsedCost
+        savedRecord.notes = optionalText(notes)
+        if record == nil {
+            modelContext.insert(savedRecord)
+        }
         do {
             try modelContext.save()
             dismiss()
         } catch {
-            // Remove only this failed insertion, preserving other pending changes.
-            modelContext.delete(record)
+            // Restore only this record so a later autosave cannot persist failed edits.
+            // The draft fields remain available for retrying.
+            if record == nil {
+                modelContext.delete(savedRecord)
+            } else {
+                savedRecord.serviceItemId = original.serviceItemId
+                savedRecord.serviceDate = original.serviceDate
+                savedRecord.odometerKm = original.odometerKm
+                savedRecord.performedBy = original.performedBy
+                savedRecord.cost = original.cost
+                savedRecord.notes = original.notes
+            }
             saveErrorMessage = error.localizedDescription
             isShowingSaveError = true
         }
