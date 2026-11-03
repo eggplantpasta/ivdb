@@ -98,6 +98,15 @@ struct VehicleDetailView: View {
                 }
             }
 
+            Section {
+                NavigationLink {
+                    ServiceHistoryListView(vehicle: vehicle)
+                        .id(vehicle.id)
+                } label: {
+                    Label("Service History", systemImage: "wrench.and.screwdriver")
+                }
+            }
+
             if let notes = vehicle.notes,
                !notes.isEmpty {
                 Section("Notes") {
