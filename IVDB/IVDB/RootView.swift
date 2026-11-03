@@ -15,20 +15,24 @@ struct RootView: View {
             VehicleListView(selection: $selectedVehicle)
                 .navigationTitle("My Vehicles")
         } detail: {
-            if let selectedVehicle {
-                VehicleDetailView(
-                    vehicle: selectedVehicle,
-                    selection: $selectedVehicle
-                )
-            } else {
-                ContentUnavailableView(
-                    "No Vehicle Selected",
-                    systemImage: "car",
-                    description: Text(
-                        "Select a vehicle to view its details."
+            NavigationStack {
+                if let selectedVehicle {
+                    VehicleDetailView(
+                        vehicle: selectedVehicle,
+                        selection: $selectedVehicle
                     )
-                )
+                } else {
+                    ContentUnavailableView(
+                        "No Vehicle Selected",
+                        systemImage: "car",
+                        description: Text(
+                            "Select a vehicle to view its details."
+                        )
+                    )
+                }
             }
+            // Each vehicle starts at its detail screen when the selection changes.
+            .id(selectedVehicle?.id)
         }
     }
 }
