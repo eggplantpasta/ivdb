@@ -19,6 +19,8 @@ final class Vehicle {
     var vin: String?
     var colour: String?
     var buildYear: Int?
+    var currentOdometerKm: Int? = nil
+    var odometerUpdatedAt: Date? = nil
     var notes: String?
 
     init(
@@ -29,6 +31,8 @@ final class Vehicle {
         vin: String? = nil,
         colour: String? = nil,
         buildYear: Int? = nil,
+        currentOdometerKm: Int? = nil,
+        odometerUpdatedAt: Date? = nil,
         notes: String? = nil
     ) {
         self.id = id
@@ -38,6 +42,8 @@ final class Vehicle {
         self.vin = vin
         self.colour = colour
         self.buildYear = buildYear
+        self.currentOdometerKm = currentOdometerKm
+        self.odometerUpdatedAt = odometerUpdatedAt
         self.notes = notes
     }
 }

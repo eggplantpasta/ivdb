@@ -10,6 +10,7 @@ import SwiftData
 
 struct VehicleDetailView: View {
     @State private var isShowingEditVehicle = false
+    @State private var isShowingUpdateOdometer = false
     @State private var isShowingDeleteConfirmation = false
     @State private var isShowingDeleteError = false
     @State private var deleteErrorMessage = ""
@@ -58,6 +59,41 @@ struct VehicleDetailView: View {
 
                 if let vin = vehicle.vin {
                     LabeledContent("VIN", value: vin)
+                }
+            }
+
+            Section("Odometer") {
+                if let currentOdometerKm =
+                    vehicle.currentOdometerKm {
+                    LabeledContent("Current odometer") {
+                        Text(
+                            "\(currentOdometerKm, format: .number) km"
+                        )
+                    }
+                }
+
+                if let odometerUpdatedAt =
+                    vehicle.odometerUpdatedAt {
+                    LabeledContent("Recorded") {
+                        Text(
+                            odometerUpdatedAt,
+                            format: .dateTime
+                                .day()
+                                .month()
+                                .year()
+                                .hour()
+                                .minute()
+                        )
+                    }
+                }
+
+                Button {
+                    isShowingUpdateOdometer = true
+                } label: {
+                    Label(
+                        "Update Odometer",
+                        systemImage: "gauge"
+                    )
                 }
             }
             
@@ -144,6 +180,9 @@ struct VehicleDetailView: View {
         }
         .sheet(isPresented: $isShowingEditVehicle) {
             VehicleFormView(vehicle: vehicle)
+        }
+        .sheet(isPresented: $isShowingUpdateOdometer) {
+            VehicleOdometerFormView(vehicle: vehicle)
         }
         .alert(
             "Delete Vehicle?",
