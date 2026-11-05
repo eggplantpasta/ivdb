@@ -5,6 +5,7 @@ struct ServiceScheduleListView: View {
     let vehicle: Vehicle
 
     @Query private var overrides: [ServiceScheduleOverride]
+    @Query private var history: [ServiceHistory]
     @State private var loadState: LoadState = .loading
     @State private var editingSchedule: RecommendedServiceSchedule?
 
@@ -16,6 +17,13 @@ struct ServiceScheduleListView: View {
                 override.vehicle.id == vehicleId
             },
             sort: \ServiceScheduleOverride.id
+        )
+        _history = Query(
+            filter: #Predicate<ServiceHistory> { record in
+                record.vehicle.id == vehicleId
+            },
+            sort: \ServiceHistory.serviceDate,
+            order: .reverse
         )
     }
 
@@ -54,6 +62,16 @@ struct ServiceScheduleListView: View {
                     }
                 }
 
+                if let error = _history.fetchError {
+                    Section {
+                        Text(
+                            "Service history could not be loaded. Next-service thresholds are unavailable."
+                        )
+                        Text(error.localizedDescription)
+                            .foregroundStyle(.secondary)
+                    }
+                }
+
                 if schedules.isEmpty {
                     ContentUnavailableView(
                         "No Recommended Service Schedule",
@@ -65,9 +83,32 @@ struct ServiceScheduleListView: View {
                 } else {
                     Section(vehicle.name) {
                         ForEach(schedules) { schedule in
+                            let serviceItemId =
+                                schedule.schedule.serviceItemId
                             let scheduleOverride = override(
-                                for: schedule.schedule.serviceItemId
+                                for: serviceItemId
                             )
+                            let latestHistory = latestHistory(
+                                for: serviceItemId
+                            )
+                            let effectiveIntervalKm =
+                                scheduleOverride == nil
+                                    ? schedule.schedule.intervalKm
+                                    : scheduleOverride?.intervalKm
+                            let effectiveIntervalMonths =
+                                scheduleOverride == nil
+                                    ? schedule.schedule.intervalMonths
+                                    : scheduleOverride?.intervalMonths
+                            let thresholds =
+                                NextServiceThresholdCalculator.calculate(
+                                    intervalKm: effectiveIntervalKm,
+                                    intervalMonths:
+                                        effectiveIntervalMonths,
+                                    lastServiceDate:
+                                        latestHistory?.serviceDate,
+                                    lastServiceOdometerKm:
+                                        latestHistory?.odometerKm
+                                )
 
                             Button {
                                 editingSchedule = schedule
@@ -80,7 +121,21 @@ struct ServiceScheduleListView: View {
                                         schedule.schedule.intervalMonths,
                                     manufacturerNotes:
                                         schedule.schedule.notes,
-                                    scheduleOverride: scheduleOverride
+                                    scheduleOverride: scheduleOverride,
+                                    isHistoryAvailable:
+                                        _history.fetchError == nil,
+                                    lastServiceDate:
+                                        latestHistory?.serviceDate,
+                                    lastServiceOdometerKm:
+                                        latestHistory?.odometerKm,
+                                    nextDueDate:
+                                        thresholds.nextDueDate,
+                                    nextDueOdometerKm:
+                                        thresholds.nextDueOdometerKm,
+                                    hasDistanceInterval:
+                                        effectiveIntervalKm != nil,
+                                    hasTimeInterval:
+                                        effectiveIntervalMonths != nil
                                 )
                                 .frame(
                                     maxWidth: .infinity,
@@ -131,6 +186,12 @@ struct ServiceScheduleListView: View {
         overrides.first { $0.serviceItemId == serviceItemId }
     }
 
+    private func latestHistory(
+        for serviceItemId: UUID
+    ) -> ServiceHistory? {
+        history.first { $0.serviceItemId == serviceItemId }
+    }
+
     private func loadSchedule() {
         loadState = .loading
 
@@ -176,6 +237,13 @@ private struct ServiceScheduleRow: View {
     let manufacturerIntervalMonths: Int?
     let manufacturerNotes: String?
     let scheduleOverride: ServiceScheduleOverride?
+    let isHistoryAvailable: Bool
+    let lastServiceDate: Date?
+    let lastServiceOdometerKm: Int?
+    let nextDueDate: Date?
+    let nextDueOdometerKm: Int?
+    let hasDistanceInterval: Bool
+    let hasTimeInterval: Bool
 
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
@@ -232,8 +300,83 @@ private struct ServiceScheduleRow: View {
                         .foregroundStyle(.secondary)
                 }
             }
+
+            ServiceThresholdDetails(
+                isHistoryAvailable: isHistoryAvailable,
+                lastServiceDate: lastServiceDate,
+                lastServiceOdometerKm: lastServiceOdometerKm,
+                nextDueDate: nextDueDate,
+                nextDueOdometerKm: nextDueOdometerKm,
+                hasDistanceInterval: hasDistanceInterval,
+                hasTimeInterval: hasTimeInterval
+            )
         }
         .padding(.vertical, 4)
+    }
+}
+
+private struct ServiceThresholdDetails: View {
+    let isHistoryAvailable: Bool
+    let lastServiceDate: Date?
+    let lastServiceOdometerKm: Int?
+    let nextDueDate: Date?
+    let nextDueOdometerKm: Int?
+    let hasDistanceInterval: Bool
+    let hasTimeInterval: Bool
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            if !isHistoryAvailable {
+                Text("Service history unavailable")
+                    .foregroundStyle(.secondary)
+            } else if let lastServiceDate {
+                LabeledContent("Last service") {
+                    Text(
+                        lastServiceDate,
+                        format: .dateTime.day().month().year()
+                    )
+                }
+
+                if let lastServiceOdometerKm {
+                    LabeledContent("Last odometer") {
+                        Text(
+                            "\(lastServiceOdometerKm, format: .number) km"
+                        )
+                    }
+                } else {
+                    LabeledContent("Last odometer", value: "Not recorded")
+                }
+
+                if hasTimeInterval {
+                    LabeledContent("Next due date") {
+                        if let nextDueDate {
+                            Text(
+                                nextDueDate,
+                                format: .dateTime.day().month().year()
+                            )
+                        } else {
+                            Text("Unknown")
+                        }
+                    }
+                }
+
+                if hasDistanceInterval {
+                    LabeledContent("Next due odometer") {
+                        if let nextDueOdometerKm {
+                            Text(
+                                "\(nextDueOdometerKm, format: .number) km"
+                            )
+                        } else {
+                            Text("Unknown")
+                        }
+                    }
+                }
+            } else {
+                Text("No service history")
+                    .foregroundStyle(.secondary)
+                LabeledContent("Next due", value: "Unknown")
+            }
+        }
     }
 }
 
