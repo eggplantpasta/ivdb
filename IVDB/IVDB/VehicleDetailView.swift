@@ -105,6 +105,13 @@ struct VehicleDetailView: View {
                 } label: {
                     Label("Service History", systemImage: "wrench.and.screwdriver")
                 }
+
+                NavigationLink {
+                    ServiceScheduleListView(vehicle: vehicle)
+                        .id(vehicle.id)
+                } label: {
+                    Label("Service Schedule", systemImage: "calendar")
+                }
             }
 
             if let notes = vehicle.notes,

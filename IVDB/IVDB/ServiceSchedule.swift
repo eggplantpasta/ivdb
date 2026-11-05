@@ -33,3 +33,12 @@ struct ServiceSchedule: Identifiable, Hashable {
         self.notes = notes
     }
 }
+
+struct RecommendedServiceSchedule: Identifiable, Hashable {
+    let schedule: ServiceSchedule
+    let serviceItemName: String?
+
+    var id: UUID {
+        schedule.id
+    }
+}

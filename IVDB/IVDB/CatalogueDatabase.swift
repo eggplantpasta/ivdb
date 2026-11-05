@@ -415,6 +415,107 @@ final class CatalogueDatabase {
         }
     }
 
+    func fetchRecommendedServiceSchedules(
+        vehicleSpecificationId: UUID
+    ) throws -> [RecommendedServiceSchedule] {
+        let sql = """
+            SELECT
+                schedule.service_schedule_id,
+                schedule.vehicle_specification_id,
+                schedule.service_item_id,
+                schedule.interval_km,
+                schedule.interval_months,
+                schedule.notes,
+                item.name
+            FROM service_schedule AS schedule
+            LEFT JOIN service_item AS item
+                ON item.service_item_id = schedule.service_item_id
+            WHERE schedule.vehicle_specification_id = ?
+            ORDER BY item.name COLLATE NOCASE, schedule.service_schedule_id
+            """
+
+        var statement: OpaquePointer?
+
+        guard sqlite3_prepare_v2(
+            connection,
+            sql,
+            -1,
+            &statement,
+            nil
+        ) == SQLITE_OK else {
+            throw CatalogueDatabaseError.queryFailed(
+                String(cString: sqlite3_errmsg(connection))
+            )
+        }
+
+        defer {
+            sqlite3_finalize(statement)
+        }
+
+        guard sqlite3_bind_text(
+            statement,
+            1,
+            vehicleSpecificationId.uuidString.lowercased(),
+            -1,
+            sqliteTransient
+        ) == SQLITE_OK else {
+            throw CatalogueDatabaseError.queryFailed(
+                String(cString: sqlite3_errmsg(connection))
+            )
+        }
+
+        var schedules: [RecommendedServiceSchedule] = []
+
+        while true {
+            switch sqlite3_step(statement) {
+            case SQLITE_ROW:
+                guard
+                    let idText = sqlite3_column_text(statement, 0),
+                    let id = UUID(uuidString: String(cString: idText)),
+                    let specificationIdText = sqlite3_column_text(statement, 1),
+                    let specificationId = UUID(
+                        uuidString: String(cString: specificationIdText)
+                    ),
+                    let serviceItemIdText = sqlite3_column_text(statement, 2),
+                    let serviceItemId = UUID(
+                        uuidString: String(cString: serviceItemIdText)
+                    )
+                else {
+                    throw CatalogueDatabaseError.invalidData(
+                        "Invalid service schedule row"
+                    )
+                }
+
+                let schedule = ServiceSchedule(
+                    id: id,
+                    vehicleSpecificationId: specificationId,
+                    serviceItemId: serviceItemId,
+                    intervalKm: optionalInt(from: statement, at: 3),
+                    intervalMonths: optionalInt(from: statement, at: 4),
+                    notes: optionalText(from: statement, at: 5)
+                )
+
+                schedules.append(
+                    RecommendedServiceSchedule(
+                        schedule: schedule,
+                        serviceItemName: optionalText(
+                            from: statement,
+                            at: 6
+                        )
+                    )
+                )
+
+            case SQLITE_DONE:
+                return schedules
+
+            default:
+                throw CatalogueDatabaseError.queryFailed(
+                    String(cString: sqlite3_errmsg(connection))
+                )
+            }
+        }
+    }
+
     private func optionalText(
         from statement: OpaquePointer?,
         at index: Int32
