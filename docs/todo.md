@@ -102,25 +102,32 @@
 
 ## 8. Service schedules and due calculations
 
-- [ ] Resolve a vehicle's optional catalogue specification UUID before loading its recommended schedule
-- [ ] Query `catalogue.sqlite` for the recommended service schedule and associated service items
-- [ ] Display the recommended service schedule for a resolved vehicle specification
-- [ ] Implement vehicle-specific `ServiceScheduleOverride` records
-- [ ] Store each override's catalogue service item as a stable UUID
-- [ ] Add/edit/remove a schedule override
-- [ ] Resolve override service item UUIDs and catalogue schedule rows through the catalogue query layer
-- [ ] Resolve effective schedule across both stores: SwiftData vehicle override first, otherwise SQLite catalogue default
-- [ ] Handle missing/unresolved catalogue UUIDs and vehicles without a catalogue specification
-- [ ] Find the latest applicable service history record for each scheduled service item
-- [ ] Calculate next due odometer from last-service odometer + interval kilometres
-- [ ] Calculate next due date from last-service date + interval months
+- [x] Resolve a vehicle's optional catalogue specification UUID before loading its recommended schedule
+- [x] Query `catalogue.sqlite` for the recommended service schedule and associated service items
+- [x] Display the recommended service schedule for a resolved vehicle specification
+- [x] Implement vehicle-specific `ServiceScheduleOverride` records
+- [x] Store each override's catalogue service item as a stable UUID
+- [x] Add/edit/remove a schedule override
+- [x] Resolve override service item UUIDs and catalogue schedule rows through the catalogue query layer
+- [x] Resolve effective schedule across both stores: SwiftData vehicle override first, otherwise SQLite catalogue default
+- [x] Handle missing/unresolved catalogue UUIDs and vehicles without a catalogue specification
+- [x] Find the latest applicable service history record for each scheduled service item
+- [x] Calculate next due odometer from last-service odometer + interval kilometres
+- [x] Calculate next due date from last-service date + interval months
 - [ ] Treat a service as due when either distance or time threshold is reached first
-- [ ] Handle schedules containing only kilometres or only months
-- [ ] Handle service items with no fixed schedule
-- [ ] Do not persist calculated next-due values as authoritative data
+- [x] Handle schedules containing only kilometres or only months
+- [x] Handle service items with no fixed schedule
+- [x] Do not persist calculated next-due values as authoritative data
 - [ ] Create an upcoming/due service view
 - [ ] Distinguish overdue, due soon and not-yet-due items in the UI
 - [ ] Decide how to calculate distance-based due status when the vehicle's current odometer is unknown
+- [ ] Each vehicle stores an optional current odometer reading and its recording date.
+- [ ] Due status is calculated dynamically, never persisted.
+- [ ] A service is due when either its date or kilometre threshold is reached.
+- [ ] Due soon means within 30 days or 1,000 km.
+- [ ] Unknown information must not be interpreted as evidence that servicing isn't due.
+- [ ] The user can check servicing without updating the odometer.
+- [ ] Due-service results use semantic red/orange indicators, with text labels for accessibility.
 
 ## 9. iCloud / CloudKit synchronisation
 
@@ -185,3 +192,7 @@
 - [ ] Consider local notifications for upcoming service items
 - [ ] Consider importing/exporting user service data
 - [ ] Consider attaching receipts/documents if a real requirement emerges
+- [ ] Investigate on-device odometer recognition using Apple Vision/VisionKit
+- [ ] Allow optional camera-based odometer entry
+- [ ] Require user confirmation of recognised readings before saving
+- [ ] Retain manual odometer entry as the fallback
