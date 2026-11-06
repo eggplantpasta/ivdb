@@ -148,6 +148,16 @@ struct VehicleDetailView: View {
                 } label: {
                     Label("Service Schedule", systemImage: "calendar")
                 }
+
+                NavigationLink {
+                    CheckDueServicesView(vehicle: vehicle)
+                        .id(vehicle.id)
+                } label: {
+                    Label(
+                        "Check Due Services",
+                        systemImage: "checkmark.circle"
+                    )
+                }
             }
 
             if let notes = vehicle.notes,
