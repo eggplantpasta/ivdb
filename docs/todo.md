@@ -114,20 +114,22 @@
 - [x] Find the latest applicable service history record for each scheduled service item
 - [x] Calculate next due odometer from last-service odometer + interval kilometres
 - [x] Calculate next due date from last-service date + interval months
-- [ ] Treat a service as due when either distance or time threshold is reached first
 - [x] Handle schedules containing only kilometres or only months
 - [x] Handle service items with no fixed schedule
 - [x] Do not persist calculated next-due values as authoritative data
-- [ ] Create an upcoming/due service view
-- [ ] Distinguish overdue, due soon and not-yet-due items in the UI
-- [ ] Decide how to calculate distance-based due status when the vehicle's current odometer is unknown
-- [ ] Each vehicle stores an optional current odometer reading and its recording date.
-- [ ] Due status is calculated dynamically, never persisted.
-- [ ] A service is due when either its date or kilometre threshold is reached.
-- [ ] Due soon means within 30 days or 1,000 km.
-- [ ] Unknown information must not be interpreted as evidence that servicing isn't due.
-- [ ] The user can check servicing without updating the odometer.
-- [ ] Due-service results use semantic red/orange indicators, with text labels for accessibility.
+- [x] Store an optional current odometer reading and recording date for each vehicle
+- [ ] Add a Check Due Services view
+- [ ] Calculate overdue, due soon, not-yet-due and unknown service status
+- [ ] Apply the due-soon thresholds to date-based and distance-based schedules
+- [ ] Highlight due-service status semantically, with text labels for accessibility
+
+Due-status design decisions:
+
+- A service is due when either its date or distance threshold is reached.
+- Due soon means within 30 days or 1,000 km.
+- Unknown readings must not imply that a service is not due.
+- Due status is calculated dynamically and is never persisted.
+- Updating the vehicle odometer is optional when checking due services.
 
 ## 9. iCloud / CloudKit synchronisation
 
@@ -165,7 +167,9 @@
 - [ ] Add unit tests for effective schedule selection
 - [ ] Add unit tests for next-due date calculations
 - [ ] Add unit tests for next-due odometer calculations
+- [ ] Add unit tests for due-status classification
 - [ ] Test null/missing odometer values
+- [ ] Test due-status handling with missing current odometer or service history
 - [ ] Test vehicles without a catalogue specification
 - [ ] Test schedule overrides
 - [ ] Test create/edit/delete flows for user-owned records
@@ -192,7 +196,6 @@
 - [ ] Consider local notifications for upcoming service items
 - [ ] Consider importing/exporting user service data
 - [ ] Consider attaching receipts/documents if a real requirement emerges
-- [ ] Investigate on-device odometer recognition using Apple Vision/VisionKit
-- [ ] Allow optional camera-based odometer entry
+- [ ] Add optional on-device odometer OCR using Apple Vision/VisionKit
 - [ ] Require user confirmation of recognised readings before saving
-- [ ] Retain manual odometer entry as the fallback
+- [ ] Keep manual odometer entry available
