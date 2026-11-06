@@ -118,10 +118,10 @@
 - [x] Handle service items with no fixed schedule
 - [x] Do not persist calculated next-due values as authoritative data
 - [x] Store an optional current odometer reading and recording date for each vehicle
-- [ ] Add a Check Due Services view
-- [ ] Calculate overdue, due soon, not-yet-due and unknown service status
-- [ ] Apply the due-soon thresholds to date-based and distance-based schedules
-- [ ] Highlight due-service status semantically, with text labels for accessibility
+- [x] Add a Check Due Services view
+- [x] Calculate overdue, due soon, not-yet-due and unknown service status
+- [x] Apply the due-soon thresholds to date-based and distance-based schedules
+- [x] Highlight due-service status semantically, with text labels for accessibility
 
 Due-status design decisions:
 
