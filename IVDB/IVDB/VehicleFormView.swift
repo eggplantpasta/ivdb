@@ -144,10 +144,18 @@ struct VehicleFormView: View {
                         "Registration",
                         text: uppercaseBinding(for: $registration)
                     )
+#if os(iOS)
+                    .textInputAutocapitalization(.characters)
+#endif
+                    .autocorrectionDisabled()
                     TextField(
                         "VIN",
                         text: uppercaseBinding(for: $vin)
                     )
+#if os(iOS)
+                    .textInputAutocapitalization(.characters)
+#endif
+                    .autocorrectionDisabled()
                     TextField("Colour", text: $colour)
                     TextField("Build year", text: $buildYear)
                         .keyboardType(.numberPad)
