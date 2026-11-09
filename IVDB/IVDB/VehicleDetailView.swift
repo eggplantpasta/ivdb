@@ -42,7 +42,7 @@ struct VehicleDetailView: View {
                 if let registration = vehicle.registration {
                     LabeledContent(
                         "Registration",
-                        value: registration
+                        value: registration.uppercased()
                     )
                 }
 
@@ -58,7 +58,7 @@ struct VehicleDetailView: View {
                 }
 
                 if let vin = vehicle.vin {
-                    LabeledContent("VIN", value: vin)
+                    LabeledContent("VIN", value: vin.uppercased())
                 }
             }
 

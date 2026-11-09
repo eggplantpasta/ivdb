@@ -38,9 +38,9 @@ struct VehicleFormView: View {
 
         _name = State(initialValue: vehicle?.name ?? "")
         _registration = State(
-            initialValue: vehicle?.registration ?? ""
+            initialValue: vehicle?.registration?.uppercased() ?? ""
         )
-        _vin = State(initialValue: vehicle?.vin ?? "")
+        _vin = State(initialValue: vehicle?.vin?.uppercased() ?? "")
         _colour = State(initialValue: vehicle?.colour ?? "")
         _buildYear = State(
             initialValue: vehicle?.buildYear.map(String.init) ?? ""
@@ -140,8 +140,14 @@ struct VehicleFormView: View {
                 }
                 Section("Vehicle") {
                     TextField("Name", text: $name)
-                    TextField("Registration", text: $registration)
-                    TextField("VIN", text: $vin)
+                    TextField(
+                        "Registration",
+                        text: uppercaseBinding(for: $registration)
+                    )
+                    TextField(
+                        "VIN",
+                        text: uppercaseBinding(for: $vin)
+                    )
                     TextField("Colour", text: $colour)
                     TextField("Build year", text: $buildYear)
                         .keyboardType(.numberPad)
@@ -216,8 +222,8 @@ struct VehicleFormView: View {
         if let vehicle {
             vehicle.vehicleSpecificationId = selectedVehicleSpecificationId
             vehicle.name = trimmedName
-            vehicle.registration = optionalText(registration)
-            vehicle.vin = optionalText(vin)
+            vehicle.registration = optionalUppercaseText(registration)
+            vehicle.vin = optionalUppercaseText(vin)
             vehicle.colour = optionalText(colour)
             vehicle.buildYear = parsedBuildYear
             vehicle.notes = optionalText(notes)
@@ -225,8 +231,8 @@ struct VehicleFormView: View {
             let newVehicle = Vehicle(
                 vehicleSpecificationId: selectedVehicleSpecificationId,
                 name: trimmedName,
-                registration: optionalText(registration),
-                vin: optionalText(vin),
+                registration: optionalUppercaseText(registration),
+                vin: optionalUppercaseText(vin),
                 colour: optionalText(colour),
                 buildYear: parsedBuildYear,
                 notes: optionalText(notes)
@@ -256,6 +262,19 @@ struct VehicleFormView: View {
         }
     }
     
+    private func uppercaseBinding(
+        for value: Binding<String>
+    ) -> Binding<String> {
+        Binding(
+            get: { value.wrappedValue },
+            set: { value.wrappedValue = $0.uppercased() }
+        )
+    }
+
+    private func optionalUppercaseText(_ value: String) -> String? {
+        optionalText(value)?.uppercased()
+    }
+
     private func optionalText(_ value: String) -> String? {
         let trimmed = value.trimmingCharacters(
             in: .whitespacesAndNewlines
